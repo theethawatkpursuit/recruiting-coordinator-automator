@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RecruitFlow — Import Candidates</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <nav class="sidebar">
+    <h2 class="logo-small">RecruitFlow</h2>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="pipeline.html">Pipeline</a>
+    <a href="candidates-list.html">All Candidates</a>
+    <a href="import.html" class="active">Import</a>
+    <a href="tasks.html">Tasks</a>
+    <a href="reports.html">Reports</a>
+    <div class="sidebar-footer">
+      <span>Priya N.</span>
+      <a href="index.html" class="logout">Log Out</a>
+    </div>
+  </nav>
+
+  <main class="content">
+    <header class="page-header">
+      <h1>Import Candidates</h1>
+      <p>Upload a spreadsheet (.csv) to add candidates in bulk</p>
+    </header>
+
+    <!-- Instructions panel -->
+    <section class="panel">
+      <h2>How to Import</h2>
+      <ol class="import-steps">
+        <li>In Excel or Google Sheets, make sure your columns are:
+          <code>name, role, dept, source, stage</code></li>
+        <li>Save / download the file as <strong>CSV</strong>.</li>
+        <li>Choose the file below and click <strong>Import</strong>.</li>
+      </ol>
+      <a href="candidate-template.csv" download class="btn-secondary btn-small">
+        Download Template
+      </a>
+    </section>
+
+    <!-- Upload panel -->
+    <section class="panel">
+      <h2>Upload File</h2>
+      <input type="file" id="fileInput" accept=".csv" class="file-input">
+      <button class="btn-primary" onclick="importFile()">Import</button>
+      <p id="importMessage" class="import-message"></p>
+    </section>
+
+    <!-- Preview panel (filled in after import) -->
+    <section class="panel" id="previewPanel" style="display:none;">
+      <h2>Imported Candidates</h2>
+      <table class="data-table" id="previewTable">
+        <thead>
+          <tr><th>Name</th><th>Role</th><th>Department</th><th>Source</th><th>Stage</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+  </main>
+
+  <script src="js/data.js"></script>
+  <script src="js/import.js"></script>
+</body>
+</html>

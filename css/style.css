@@ -315,3 +315,17 @@ a { text-decoration: none; color: inherit; }
   .two-col { grid-template-columns: 1fr; }
   .kanban { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* ---------- Import Page ---------- */
+.import-steps { line-height: 1.9; color: #374151; margin-bottom: 16px; }
+.import-steps code {
+  background: #F3F4F6; padding: 2px 6px; border-radius: 4px;
+  font-size: 13px; color: #2563EB;
+}
+.file-input {
+  display: block; margin-bottom: 16px; padding: 10px;
+  border: 1px dashed #9CA3AF; border-radius: 8px; width: 100%;
+}
+.import-message { margin-top: 12px; font-weight: 600; }
+.import-message.success { color: #16A34A; }
+.import-message.error { color: #DC2626; }
