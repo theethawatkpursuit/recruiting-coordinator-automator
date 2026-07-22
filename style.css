@@ -1,0 +1,317 @@
+/* ---------- Base ---------- */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background: #F7F8FA;
+  color: #1F2937;
+  line-height: 1.5;
+}
+
+a { text-decoration: none; color: inherit; }
+
+/* ---------- Login ---------- */
+.login-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: linear-gradient(135deg, #2563EB, #1E40AF);
+}
+.login-card {
+  background: #fff;
+  padding: 40px;
+  border-radius: 16px;
+  width: 360px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+  text-align: center;
+}
+.logo { color: #2563EB; font-size: 28px; margin-bottom: 4px; }
+.tagline { color: #6B7280; margin-bottom: 24px; }
+
+.login-card form { text-align: left; }
+.login-card label {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 6px;
+  color: #6B7280;
+}
+.login-card input {
+  width: 100%;
+  padding: 10px 12px;
+  margin-bottom: 18px;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  font-size: 14px;
+}
+.login-card input:focus { outline: 2px solid #2563EB; border-color: #2563EB; }
+
+/* ---------- Buttons ---------- */
+.btn-primary {
+  background: #2563EB;
+  color: #fff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.2s;
+}
+.btn-primary:hover { background: #1D4ED8; }
+
+.btn-secondary {
+  background: #fff;
+  color: #2563EB;
+  border: 1px solid #2563EB;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.btn-secondary:hover { background: #EFF6FF; }
+
+.btn-small {
+  font-size: 12px;
+  padding: 6px 10px;
+  width: auto;
+  margin-right: 6px;
+}
+
+/* ---------- Sidebar Layout ---------- */
+.sidebar {
+  position: fixed;
+  top: 0; left: 0;
+  width: 220px;
+  height: 100vh;
+  background: #1F2937;
+  color: #E5E7EB;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+}
+.logo-small {
+  color: #fff;
+  font-size: 20px;
+  margin-bottom: 30px;
+}
+.sidebar a {
+  display: block;
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: #D1D5DB;
+  margin-bottom: 6px;
+  font-size: 15px;
+  transition: background 0.2s;
+}
+.sidebar a:hover { background: #374151; color: #fff; }
+.sidebar a.active { background: #2563EB; color: #fff; }
+
+.sidebar-footer {
+  margin-top: auto;
+  border-top: 1px solid #374151;
+  padding-top: 16px;
+  font-size: 14px;
+}
+.sidebar-footer .logout {
+  color: #9CA3AF;
+  font-size: 13px;
+  padding: 4px 0;
+}
+.sidebar-footer .logout:hover { color: #fff; background: none; }
+
+/* ---------- Content ---------- */
+.content {
+  margin-left: 220px;
+  padding: 32px 40px;
+}
+.page-header { margin-bottom: 24px; }
+.page-header h1 { font-size: 26px; }
+.page-header p { color: #6B7280; }
+
+.back-link {
+  color: #2563EB;
+  font-size: 14px;
+  display: inline-block;
+  margin-bottom: 16px;
+}
+
+/* ---------- Stat Cards ---------- */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+  margin-bottom: 28px;
+}
+.stat-card {
+  background: #fff;
+  border: 1px solid #E5E7EB;
+  border-radius: 12px;
+  padding: 18px;
+}
+.stat-card .num { font-size: 28px; font-weight: 700; }
+.stat-card .label { color: #6B7280; font-size: 13px; margin-top: 4px; }
+.stat-card.warning .num { color: #DC2626; }
+.stat-card.success .num { color: #16A34A; }
+
+/* ---------- Panels ---------- */
+.panel {
+  background: #fff;
+  border: 1px solid #E5E7EB;
+  border-radius: 12px;
+  padding: 22px;
+  margin-bottom: 24px;
+}
+.panel h2 { font-size: 18px; margin-bottom: 6px; }
+.panel-sub { color: #6B7280; font-size: 13px; margin-bottom: 16px; }
+
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+/* ---------- Tables ---------- */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.data-table th, .data-table td {
+  text-align: left;
+  padding: 12px 10px;
+  border-bottom: 1px solid #E5E7EB;
+}
+.data-table th { color: #6B7280; font-weight: 600; font-size: 13px; }
+.data-table tr:last-child td { border-bottom: none; }
+
+/* ---------- Badges ---------- */
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.badge-risk { background: #FEE2E2; color: #DC2626; }
+.badge-wait { background: #FEF3C7; color: #B45309; }
+.badge-action { background: #DBEAFE; color: #1D4ED8; }
+.badge-ok { background: #DCFCE7; color: #15803D; }
+
+/* ---------- Stage List ---------- */
+.stage-list, .task-list { list-style: none; }
+.stage-list li {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #F3F4F6;
+  font-size: 14px;
+}
+.stage-list li:last-child { border-bottom: none; }
+.stage-list .count { font-weight: 700; }
+
+/* ---------- Task List ---------- */
+.task-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid #F3F4F6;
+  font-size: 14px;
+}
+.task-list li:last-child { border-bottom: none; }
+.task-list .dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #2563EB; flex-shrink: 0;
+}
+.task-list .dot.overdue { background: #DC2626; }
+.danger-text { color: #DC2626; }
+
+/* ---------- Filters ---------- */
+.filters {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.filters select {
+  padding: 8px 12px;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #fff;
+}
+
+/* ---------- Kanban ---------- */
+.kanban {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
+  overflow-x: auto;
+}
+.kanban-col {
+  background: #F3F4F6;
+  border-radius: 12px;
+  padding: 12px;
+  min-width: 160px;
+}
+.kanban-col h3 {
+  font-size: 13px;
+  color: #6B7280;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.kanban-card {
+  background: #fff;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+}
+.kanban-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+.kanban-card .name { font-weight: 600; font-size: 14px; }
+.kanban-card .role { color: #6B7280; font-size: 12px; margin: 2px 0 6px; }
+
+/* ---------- Candidate Detail ---------- */
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 24px;
+  margin-bottom: 20px;
+}
+.detail-grid .field .k { color: #6B7280; font-size: 12px; }
+.detail-grid .field .v { font-size: 15px; font-weight: 500; }
+.action-row { margin: 20px 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.notes-box {
+  background: #F9FAFB;
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  padding: 14px;
+  font-size: 14px;
+}
+.alert-banner {
+  background: #FEE2E2;
+  border: 1px solid #FCA5A5;
+  color: #991B1B;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+/* ---------- Report actions ---------- */
+.report-actions { margin-top: 20px; display: flex; gap: 12px; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+  .two-col { grid-template-columns: 1fr; }
+  .kanban { grid-template-columns: repeat(2, 1fr); }
+}

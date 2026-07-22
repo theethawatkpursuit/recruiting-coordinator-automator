@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RecruitFlow — Dashboard</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Sidebar Navigation -->
+  <nav class="sidebar">
+    <h2 class="logo-small">RecruitFlow</h2>
+    <a href="dashboard.html" class="active">Dashboard</a>
+    <a href="pipeline.html">Pipeline</a>
+    <a href="tasks.html">Tasks</a>
+    <a href="reports.html">Reports</a>
+    <div class="sidebar-footer">
+      <span>Priya N.</span>
+      <a href="index.html" class="logout">Log Out</a>
+    </div>
+  </nav>
+
+  <main class="content">
+    <header class="page-header">
+      <h1>Dashboard</h1>
+      <p>Overview of your recruiting pipeline</p>
+    </header>
+
+    <!-- Stat Cards -->
+    <section class="stats-grid" id="statsGrid"></section>
+
+    <!-- Priority Alerts -->
+    <section class="panel">
+      <h2>Priority Alerts</h2>
+      <p class="panel-sub">Candidates at risk of going cold or needing action</p>
+      <table class="data-table" id="alertsTable">
+        <thead>
+          <tr>
+            <th>Candidate</th>
+            <th>Role</th>
+            <th>Issue</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <div class="two-col">
+      <!-- Pipeline Overview -->
+      <section class="panel">
+        <h2>Pipeline Overview</h2>
+        <ul class="stage-list" id="stageList"></ul>
+      </section>
+
+      <!-- Upcoming Tasks -->
+      <section class="panel">
+        <h2>Upcoming Tasks</h2>
+        <ul class="task-list" id="taskPreview"></ul>
+      </section>
+    </div>
+  </main>
+
+  <script src="js/data.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>

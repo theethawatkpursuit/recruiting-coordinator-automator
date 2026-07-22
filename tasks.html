@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RecruitFlow — Tasks</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <nav class="sidebar">
+    <h2 class="logo-small">RecruitFlow</h2>
+    <a href="dashboard.html">Dashboard</a>
+    <a href="pipeline.html">Pipeline</a>
+    <a href="tasks.html" class="active">Tasks</a>
+    <a href="reports.html">Reports</a>
+    <div class="sidebar-footer">
+      <span>Priya N.</span>
+      <a href="index.html" class="logout">Log Out</a>
+    </div>
+  </nav>
+
+  <main class="content">
+    <header class="page-header">
+      <h1>Tasks &amp; Reminders</h1>
+      <p>Actions needed so no candidate slips through the cracks</p>
+    </header>
+
+    <section class="panel">
+      <h2 class="danger-text">Overdue</h2>
+      <ul class="task-list" id="overdueTasks"></ul>
+    </section>
+
+    <section class="panel">
+      <h2>Due Today</h2>
+      <ul class="task-list" id="todayTasks"></ul>
+    </section>
+
+    <section class="panel">
+      <h2>Upcoming</h2>
+      <ul class="task-list" id="upcomingTasks"></ul>
+    </section>
+  </main>
+
+  <script src="js/data.js"></script>
+  <script src="js/tasks.js"></script>
+</body>
+</html>
