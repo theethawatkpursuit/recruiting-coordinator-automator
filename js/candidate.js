@@ -1,63 +1,118 @@
-// Read the candidate id from the web address (?id=)
+// Get the candidate id from the URL
+// Example: candidate.html?id=3
 var params = new URLSearchParams(window.location.search);
-var id = parseInt(params.get("id"), 10);
+var candidateId = Number(params.get("id"));
 
-// Find the matching candidate
-var c = null;
+var selectedCandidate = null;
+
+// Find the candidate with this id
 for (var i = 0; i < CANDIDATES.length; i++) {
-  if (CANDIDATES[i].id === id) {
-    c = CANDIDATES[i];
+  if (CANDIDATES[i].id === candidateId) {
+    selectedCandidate = CANDIDATES[i];
   }
 }
 
-// If no candidate was found, just show the first one
-if (c === null) {
-  c = CANDIDATES[0];
+// If no matching candidate is found, show an error
+if (selectedCandidate === null) {
+  document.getElementById("candidateDetail").innerHTML =
+    '<section class="panel">' +
+      '<h2>Candidate Not Found</h2>' +
+      '<p>This candidate may have been deleted or the link is incorrect.</p>' +
+      '<a href="candidates-list.html" class="btn-secondary">Back to All Candidates</a>' +
+    '</section>';
+} else {
+  showCandidateDetail(selectedCandidate);
 }
 
-var b = statusBadge(c.status);
 
-// Decision point: Is candidate at risk? If so, show a warning banner
-var riskBanner = "";
-if (c.status === "risk") {
-  riskBanner =
-    '<div class="alert-banner">' +
-      "This candidate has had no contact in " + c.lastContact +
-      " days and is at risk of going cold. Take action now." +
-    "</div>";
+// Display the candidate detail card
+function showCandidateDetail(candidate) {
+  var detailHTML = "";
+
+  detailHTML = detailHTML +
+    '<section class="panel candidate-profile">' +
+      '<div class="profile-header">' +
+        '<div>' +
+          '<h2>' + candidate.name + '</h2>' +
+          '<p>' + candidate.role + ' — ' + candidate.dept + '</p>' +
+        '</div>' +
+        '<span class="badge ' + statusBadge(candidate.status).cls + '">' +
+          statusBadge(candidate.status).text +
+        '</span>' +
+      '</div>' +
+
+      '<div class="detail-grid">' +
+        '<div class="detail-item">' +
+          '<strong>Stage</strong>' +
+          '<span>' + candidate.stage + '</span>' +
+        '</div>' +
+
+        '<div class="detail-item">' +
+          '<strong>Source</strong>' +
+          '<span>' + candidate.source + '</span>' +
+        '</div>' +
+
+        '<div class="detail-item">' +
+          '<strong>Hiring Manager</strong>' +
+          '<span>' + candidate.manager + '</span>' +
+        '</div>' +
+
+        '<div class="detail-item">' +
+          '<strong>Last Contact</strong>' +
+          '<span>' + candidate.lastContact + ' days ago</span>' +
+        '</div>' +
+
+        '<div class="detail-item">' +
+          '<strong>Interview Date</strong>' +
+          '<span>' + candidate.interviewDate + '</span>' +
+        '</div>' +
+
+        '<div class="detail-item">' +
+          '<strong>Next Step</strong>' +
+          '<span>' + candidate.nextStep + '</span>' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="notes-box">' +
+        '<h3>Notes</h3>' +
+        '<p>' + candidate.notes + '</p>' +
+      '</div>' +
+
+      '<div class="candidate-actions">' +
+        '<a href="candidates-list.html" class="btn-secondary">Back to All Candidates</a>' +
+        '<button class="btn-danger" onclick="deleteCandidate(' + candidate.id + ')">Delete Candidate</button>' +
+      '</div>' +
+    '</section>';
+
+  document.getElementById("candidateDetail").innerHTML = detailHTML;
 }
 
-// Build the whole candidate detail view
-var html =
-  riskBanner +
-  '<div class="panel">' +
-    '<div class="detail-header">' +
-      "<div>" +
-        "<h1>" + c.name + "</h1>" +
-        '<p style="color:#6B7280;">' + c.role + " - " + c.dept + "</p>" +
-      "</div>" +
-      '<span class="badge ' + b.cls + '">' + b.text + "</span>" +
-    "</div>" +
 
-    '<div class="detail-grid">' +
-      '<div class="field"><div class="k">Source</div><div class="v">' + c.source + "</div></div>" +
-      '<div class="field"><div class="k">Current Stage</div><div class="v">' + c.stage + "</div></div>" +
-      '<div class="field"><div class="k">Last Contact</div><div class="v">' + c.lastContact + " days ago</div></div>" +
-      '<div class="field"><div class="k">Hiring Manager</div><div class="v">' + c.manager + "</div></div>" +
-      '<div class="field"><div class="k">Interview</div><div class="v">' + c.interviewDate + "</div></div>" +
-      '<div class="field"><div class="k">Next Step</div><div class="v">' + c.nextStep + "</div></div>" +
-    "</div>" +
+// Delete the selected candidate
+function deleteCandidate(id) {
+  var confirmDelete = confirm("Are you sure you want to delete this candidate? This cannot be undone.");
 
-    '<div class="action-row">' +
-      '<button class="btn-primary btn-small" onclick="alert(\'Update sent (placeholder)\')">Send Update</button>' +
-      '<button class="btn-secondary btn-small" onclick="alert(\'Scheduling... (placeholder)\')">Schedule Interview</button>' +
-      '<button class="btn-secondary btn-small" onclick="alert(\'Feedback requested (placeholder)\')">Request Feedback</button>' +
-      '<button class="btn-secondary btn-small" onclick="alert(\'Stage moved (placeholder)\')">Move Stage</button>' +
-      '<button class="btn-secondary btn-small" onclick="alert(\'Candidate archived (placeholder)\')">Archive</button>' +
-    "</div>" +
+  if (confirmDelete === false) {
+    return;
+  }
 
-    '<h2 style="font-size:16px;margin-bottom:8px;">Notes</h2>' +
-    '<div class="notes-box">' + c.notes + "</div>" +
-  "</div>";
+  // Find the candidate position in the array
+  var deleteIndex = -1;
 
-document.getElementById("candidateDetail").innerHTML = html;
+  for (var i = 0; i < CANDIDATES.length; i++) {
+    if (CANDIDATES[i].id === id) {
+      deleteIndex = i;
+    }
+  }
+
+  // If found, remove from the array
+  if (deleteIndex !== -1) {
+    CANDIDATES.splice(deleteIndex, 1);
+
+    // Save updated list to localStorage
+    saveCandidates();
+
+    // Go back to the list page
+    window.location.href = "candidates-list.html";
+  }
+}
