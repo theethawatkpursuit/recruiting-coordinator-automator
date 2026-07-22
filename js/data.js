@@ -1,7 +1,7 @@
 // Shared candidate data used across all pages.
 // In a real app this would come from a database/API.
 
-const CANDIDATES = [
+var CANDIDATES = [
   {
     id: 1, name: "Maya Chen", role: "UX Designer", dept: "Product",
     source: "LinkedIn", stage: "Interview", lastContact: 10,
@@ -97,3 +97,33 @@ function statusBadge(status) {
     default:       return { text: "On Track",          cls: "badge-ok" };
   }
 }
+
+// Save the current candidate list to the browser
+function saveCandidates() {
+  localStorage.setItem("recruitflowCandidates", JSON.stringify(CANDIDATES));
+}
+
+// Load saved candidates from the browser, if they exist
+function loadSavedCandidates() {
+  var saved = localStorage.getItem("recruitflowCandidates");
+
+  if (saved !== null) {
+    CANDIDATES = JSON.parse(saved);
+  }
+}
+
+// Get the next available ID number
+function getNextCandidateId() {
+  var highestId = 0;
+
+  for (var i = 0; i < CANDIDATES.length; i++) {
+    if (CANDIDATES[i].id > highestId) {
+      highestId = CANDIDATES[i].id;
+    }
+  }
+
+  return highestId + 1;
+}
+
+// Automatically load saved candidates whenever data.js loads
+loadSavedCandidates();

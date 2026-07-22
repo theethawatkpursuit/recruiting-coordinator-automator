@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RecruitFlow — Candidate Profile</title>
+  <title>RecruitFlow — All Candidates</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -12,20 +12,20 @@
 
   <main class="content">
     <header class="page-header">
-      <h1>Candidate Profile</h1>
-      <p>Review candidate details and next steps</p>
+      <h1>All Candidates</h1>
+      <p>Click any candidate to see their full profile</p>
     </header>
 
-    <!-- JavaScript fills this with the selected candidate's profile -->
-    <div id="candidateDetail"></div>
+    <!-- JavaScript fills this with clickable candidate rows -->
+    <div class="candidate-list-box" id="candidateList"></div>
   </main>
 
-  <!-- Data must load before candidate.js -->
+  <!-- Data must load before candidates-list.js -->
   <script src="js/data.js"></script>
-  <script src="js/candidate.js"></script>
+  <script src="js/candidates-list.js"></script>
 
-  <!-- Sidebar setup: no active page because this is a detail page -->
-  <script>var ACTIVE_PAGE = "";</script>
+  <!-- Sidebar setup -->
+  <script>var ACTIVE_PAGE = "candidates-list.html";</script>
   <script src="js/sidebar.js"></script>
 </body>
 </html>

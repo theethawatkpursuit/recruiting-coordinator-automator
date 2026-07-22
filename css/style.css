@@ -329,3 +329,52 @@ a { text-decoration: none; color: inherit; }
 .import-message { margin-top: 12px; font-weight: 600; }
 .import-message.success { color: #16A34A; }
 .import-message.error { color: #DC2626; }
+
+/* ---------- Scrollable Candidate List ---------- */
+.candidate-list-box {
+  background: #fff;
+  border: 1px solid #E5E7EB;
+  border-radius: 12px;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.candidate-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border-bottom: 1px solid #F3F4F6;
+  cursor: pointer;
+  transition: background 0.15s;
+  text-decoration: none;
+  color: inherit;
+}
+
+.candidate-row:hover {
+  background: #F9FAFB;
+}
+
+.candidate-row:last-child {
+  border-bottom: none;
+}
+
+.candidate-main {
+  flex: 1;
+}
+
+.candidate-name {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.candidate-sub {
+  color: #6B7280;
+  font-size: 13px;
+}
+
+.candidate-stage {
+  font-size: 13px;
+  color: #374151;
+  min-width: 110px;
+}
