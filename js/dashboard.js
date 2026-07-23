@@ -1,5 +1,5 @@
 // ---------- Stat Cards ----------
-const atRisk = CANDIDATES.filter(c => c.status === "risk").length;
+const atRisk = CANDIDATES.filter(c => c.status === "risk" || c.lastContact >= 7).length;
 const waiting = CANDIDATES.filter(c => c.status === "wait").length;
 
 const stats = [
@@ -18,12 +18,11 @@ document.getElementById("statsGrid").innerHTML = stats.map(s => `
 `).join("");
 
 // ---------- Priority Alerts ----------
-// Decision point: {Are any candidates at risk or needing action?}
-const alerts = CANDIDATES.filter(c => c.status !== "ok");
+const alerts = CANDIDATES.filter(c => c.status !== "ok" || c.lastContact >= 7);
 
 document.querySelector("#alertsTable tbody").innerHTML = alerts.map(c => {
   const b = statusBadge(c.status);
-  const issue = c.status === "risk"
+  const issue = (c.status === "risk" || c.lastContact >= 7)
     ? `No update in ${c.lastContact} days`
     : c.nextStep;
   return `
@@ -31,6 +30,7 @@ document.querySelector("#alertsTable tbody").innerHTML = alerts.map(c => {
       <td>${c.name}</td>
       <td>${c.role}</td>
       <td><span class="badge ${b.cls}">${issue}</span></td>
+      <td><span class="source-tag">${c.source}</span></td>
       <td><a class="btn-secondary btn-small" href="candidate.html?id=${c.id}">Review</a></td>
     </tr>`;
 }).join("");
@@ -45,8 +45,12 @@ document.getElementById("stageList").innerHTML = Object.entries(stageCounts).map
 ).join("");
 
 // ---------- Upcoming Tasks Preview ----------
-const preview = [...TASKS.overdue.map(t => ({ t, overdue: true })),
-                 ...TASKS.today.map(t => ({ t, overdue: false }))].slice(0, 5);
+const dynamicTasks = getDynamicTasks();
+const preview = [
+  ...dynamicTasks.overdue.map(t => ({ t, overdue: true })),
+  ...dynamicTasks.today.map(t => ({ t, overdue: false })),
+  ...dynamicTasks.upcoming.map(t => ({ t, overdue: false }))
+].slice(0, 5);
 
 document.getElementById("taskPreview").innerHTML = preview.map(item => `
   <li><span class="dot ${item.overdue ? 'overdue' : ''}"></span>${item.t}</li>

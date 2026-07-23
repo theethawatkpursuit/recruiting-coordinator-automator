@@ -39,7 +39,6 @@ document.getElementById("reportStats").innerHTML = statsHTML;
 
 
 // ---------- Source Effectiveness Table ----------
-// Highlights which sources produce the best hires (Priya's key question)
 
 var tableHTML = "";
 for (var i = 0; i < SOURCES.length; i++) {
@@ -73,3 +72,49 @@ for (var i = 0; i < SOURCES.length; i++) {
     "</tr>";
 }
 document.querySelector("#sourceTable tbody").innerHTML = tableHTML;
+
+
+// ---------- Export Report Function ----------
+
+function exportCandidatesCSV() {
+  if (!CANDIDATES || CANDIDATES.length === 0) {
+    alert("No candidate data available to export.");
+    return;
+  }
+
+  // 1. Column Headers
+  var headers = ["ID", "Name", "Role", "Department", "Source", "Stage", "Status", "Last Contact (Days)", "Hiring Manager", "Next Step", "Notes"];
+
+  // 2. Build Rows
+  var csvRows = [headers.join(",")];
+
+  for (var i = 0; i < CANDIDATES.length; i++) {
+    var c = CANDIDATES[i];
+    var row = [
+      c.id,
+      '"' + (c.name || '') + '"',
+      '"' + (c.role || '') + '"',
+      '"' + (c.dept || '') + '"',
+      '"' + (c.source || '') + '"',
+      '"' + (c.stage || '') + '"',
+      '"' + (c.status || '') + '"',
+      c.lastContact,
+      '"' + (c.manager || '') + '"',
+      '"' + (c.nextStep || '') + '"',
+      '"' + (c.notes || '').replace(/"/g, '""') + '"'
+    ];
+    csvRows.push(row.join(","));
+  }
+
+  // 3. Create blob and download
+  var csvString = csvRows.join("\n");
+  var blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
+  var link = document.createElement("a");
+  var today = new Date().toISOString().split('T')[0];
+
+  link.href = URL.createObjectURL(blob);
+  link.setAttribute("download", "candidate_report_" + today + ".csv");
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RecruitFlow — Interview Calendar</title>
+  <link rel="stylesheet" href="css/style.css">
+  
+  <!-- FullCalendar v6 CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+</head>
+<body>
+  <!-- Sidebar Navigation -->
+  <nav class="sidebar"></nav>
+
+  <main class="content">
+    <header class="page-header">
+      <h1>Interview Calendar</h1>
+      <p>Schedule, view, and manage upcoming candidate interviews</p>
+    </header>
+
+    <section class="panel">
+      <!-- FullCalendar renders inside this div -->
+      <div id="calendar"></div>
+    </section>
+  </main>
+
+  <script src="js/data.js"></script>
+  <script src="js/calendar.js"></script>
+  <script>var ACTIVE_PAGE = "calendar.html";</script>
+  <script src="js/sidebar.js"></script>
+</body>
+</html>

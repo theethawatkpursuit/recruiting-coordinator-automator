@@ -1,3 +1,4 @@
+// js/sidebar.js
 // Build the sidebar once, reuse it on every page.
 // Each page sets a variable called ACTIVE_PAGE before loading this file.
 
@@ -5,6 +6,7 @@ var links = [
   { href: "dashboard.html",       label: "Dashboard" },
   { href: "pipeline.html",        label: "Pipeline" },
   { href: "candidates-list.html", label: "All Candidates" },
+  { href: "calendar.html",        label: "Calendar" }, // <-- Added Calendar page link
   { href: "import.html",          label: "Import" },
   { href: "tasks.html",           label: "Tasks" },
   { href: "reports.html",         label: "Reports" }

@@ -1,11 +1,31 @@
-/* ---------- Base ---------- */
-* { margin: 0; padding: 0; box-sizing: border-box; }
+/* ---------- Base & Font Uniformity ---------- */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
 
 body {
   font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   background: #F7F8FA;
   color: #1F2937;
   line-height: 1.5;
+}
+
+/* Force form inputs, buttons, and select boxes to inherit the body font family */
+input,
+button,
+select,
+textarea {
+  font-family: inherit;
+}
+
+/* FullCalendar Component Font Override */
+.fc, .fc * {
+  font-family: inherit !important;
 }
 
 a { text-decoration: none; color: inherit; }
@@ -77,6 +97,20 @@ a { text-decoration: none; color: inherit; }
   padding: 6px 10px;
   width: auto;
   margin-right: 6px;
+}
+
+.btn-danger {
+  background: #DC2626;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-danger:hover {
+  background: #B91C1C;
 }
 
 /* ---------- Sidebar Layout ---------- */
@@ -380,7 +414,6 @@ a { text-decoration: none; color: inherit; }
 }
 
 /* ---------- Candidate Detail Page ---------- */
-
 .candidate-profile {
   max-width: 900px;
 }
@@ -450,17 +483,82 @@ a { text-decoration: none; color: inherit; }
   margin-top: 28px;
 }
 
-.btn-danger {
-  background: #DC2626;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 10px 16px;
+/* ---------- FullCalendar Navigation & Button Fixes ---------- */
+.fc .fc-toolbar-title {
+  font-size: 1.25rem;
   font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
+  color: #1F2937;
 }
 
-.btn-danger:hover {
-  background: #B91C1C;
+/* Style all calendar buttons (Prev, Next, Today, View selectors) */
+.fc .fc-button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 36px !important;
+  padding: 0 12px !important;
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+}
+
+/* Primary Calendar Buttons (Prev/Next Arrows, Today) */
+.fc .fc-button-primary {
+  background-color: #2563EB !important;
+  border-color: #2563EB !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+  transition: background-color 0.2s, border-color 0.2s !important;
+}
+
+.fc .fc-button-primary:hover {
+  background-color: #1D4ED8 !important;
+  border-color: #1D4ED8 !important;
+}
+
+.fc .fc-button-primary:focus,
+.fc .fc-button-primary:active {
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25) !important;
+}
+
+.fc .fc-button-primary:disabled {
+  background-color: #9CA3AF !important;
+  border-color: #9CA3AF !important;
+  opacity: 0.6;
+  cursor: not-allowed !important;
+}
+
+/* Arrow Icon Alignment & Sizing Fix */
+.fc .fc-icon {
+  font-size: 1.2em !important;
+  line-height: 1 !important;
+  display: inline-block !important;
+  vertical-align: middle !important;
+}
+
+/* Button Group Alignment Fix */
+.fc .fc-button-group {
+  gap: 4px;
+}
+
+.fc .fc-button-group > .fc-button {
+  border-radius: 8px !important;
+}
+
+/* Source Tags Styling */
+.source-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  background-color: #f3f4f6; /* Light gray background */
+  color: #4b5563; /* Dark gray text */
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+/* Make sure the new column in the candidate list fits nicely */
+.candidate-row .candidate-source {
+  flex: 0 0 120px; /* Adjust width as needed */
+  text-align: left;
 }

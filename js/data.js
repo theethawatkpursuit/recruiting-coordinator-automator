@@ -1,6 +1,4 @@
 // Shared candidate data used across all pages.
-// In a real app this would come from a database/API.
-
 var CANDIDATES = [
   {
     id: 1, name: "Maya Chen", role: "UX Designer", dept: "Product",
@@ -60,10 +58,8 @@ var CANDIDATES = [
   }
 ];
 
-// The stages, in order, used by the pipeline board.
 const STAGES = ["New Applicant", "Screen", "Interview", "Final Round", "Offer"];
 
-// Source effectiveness data used by the reports page.
 const SOURCES = [
   { source: "LinkedIn",  candidates: 35, hires: 4, dropOff: "20%" },
   { source: "Indeed",    candidates: 28, hires: 2, dropOff: "35%" },
@@ -71,24 +67,6 @@ const SOURCES = [
   { source: "Agency",    candidates: 9,  hires: 1, dropOff: "40%" }
 ];
 
-// Tasks used by the tasks page.
-const TASKS = {
-  overdue: [
-    "Send update to Maya Chen (no contact in 10 days)",
-    "Send status update to Noah King (no contact in 12 days)",
-    "Request feedback for Jordan Lee"
-  ],
-  today: [
-    "Schedule interview for Sam Patel",
-    "Review new applicants for Sales Associate"
-  ],
-  upcoming: [
-    "Follow up with Emma Wilson on offer",
-    "Schedule screen call with Marcus Tan"
-  ]
-};
-
-// Helper: map a status code to a readable label + badge class.
 function statusBadge(status) {
   switch (status) {
     case "risk":   return { text: "At Risk",          cls: "badge-risk" };
@@ -98,32 +76,34 @@ function statusBadge(status) {
   }
 }
 
-// Save the current candidate list to the browser
 function saveCandidates() {
   localStorage.setItem("recruitflowCandidates", JSON.stringify(CANDIDATES));
 }
 
-// Load saved candidates from the browser, if they exist
 function loadSavedCandidates() {
   var saved = localStorage.getItem("recruitflowCandidates");
-
   if (saved !== null) {
     CANDIDATES = JSON.parse(saved);
   }
 }
 
-// Get the next available ID number
-function getNextCandidateId() {
-  var highestId = 0;
+// Generate real-time task items based on candidate statuses & contact dates
+function getDynamicTasks() {
+  const overdue = [];
+  const today = [];
+  const upcoming = [];
 
-  for (var i = 0; i < CANDIDATES.length; i++) {
-    if (CANDIDATES[i].id > highestId) {
-      highestId = CANDIDATES[i].id;
+  CANDIDATES.forEach(c => {
+    if (c.status === "risk" || c.lastContact >= 7) {
+      overdue.push(`Send update to ${c.name} (no contact in ${c.lastContact} days)`);
+    } else if (c.status === "action" || c.status === "wait") {
+      today.push(`${c.nextStep} for ${c.name}`);
+    } else {
+      upcoming.push(`${c.nextStep} for ${c.name}`);
     }
-  }
+  });
 
-  return highestId + 1;
+  return { overdue, today, upcoming };
 }
 
-// Automatically load saved candidates whenever data.js loads
 loadSavedCandidates();
