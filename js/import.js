@@ -33,7 +33,7 @@ function processCSV(text) {
     return;
   }
 
-  var headers = lines[0].split(",");
+  var headers = parseCSVLine(lines[0]);
 
   var nameIndex = findColumn(headers, "name");
   var roleIndex = findColumn(headers, "role");
@@ -58,7 +58,7 @@ function processCSV(text) {
       continue;
     }
 
-    var cells = line.split(",");
+    var cells = parseCSVLine(line);
     var newName = cleanCell(cells[nameIndex]);
 
     var isDuplicate = false;
@@ -75,7 +75,7 @@ function processCSV(text) {
     }
 
     var newCandidate = {
-      id: typeof getNextCandidateId === 'function' ? getNextCandidateId() : (CANDIDATES.length > 0 ? Math.max.apply(Math, CANDIDATES.map(function(c) { return c.id; })) + 1 : 1),
+      id: typeof getNextCandidateId === 'function' ? getNextCandidateId() : (CANDIDATES.length > 0 ? Math.max.apply(Math, CANDIDATES.map(function (c) { return c.id; })) + 1 : 1),
       name: newName,
       role: cleanCell(cells[roleIndex]),
       dept: deptIndex !== -1 ? cleanCell(cells[deptIndex]) : "Unassigned",
@@ -157,11 +157,11 @@ function showPreview(candidatesToShow) {
 
     rowsHTML = rowsHTML +
       "<tr>" +
-        "<td>" + c.name + "</td>" +
-        "<td>" + c.role + "</td>" +
-        "<td>" + c.dept + "</td>" +
-        "<td>" + c.source + "</td>" +
-        "<td>" + c.stage + "</td>" +
+      "<td>" + c.name + "</td>" +
+      "<td>" + c.role + "</td>" +
+      "<td>" + c.dept + "</td>" +
+      "<td>" + c.source + "</td>" +
+      "<td>" + c.stage + "</td>" +
       "</tr>";
   }
 

@@ -1,10 +1,11 @@
 // ---------- Report Stat Cards ----------
 
-// Add up all candidates and all hires from every source
-var totalCandidates = 0;
+// Count actual candidates currently in the system
+var totalCandidates = CANDIDATES.length;
+
+// Add up all hires from every source
 var totalHires = 0;
 for (var i = 0; i < SOURCES.length; i++) {
-  totalCandidates = totalCandidates + SOURCES[i].candidates;
   totalHires = totalHires + SOURCES[i].hires;
 }
 
@@ -40,35 +41,98 @@ document.getElementById("reportStats").innerHTML = statsHTML;
 
 // ---------- Source Effectiveness Table ----------
 
-var tableHTML = "";
+// Build a lookup from SOURCES for pipeline data, mapping display names to HR dataset names
+var sourceLookup = {};
+var hrToDisplay = { "Employee Referral": "Referrals" };
 for (var i = 0; i < SOURCES.length; i++) {
-  var s = SOURCES[i];
+  sourceLookup[SOURCES[i].source] = SOURCES[i];
+}
 
-  // Work out the hire rate as a percentage
-  var rate = (s.hires / s.candidates) * 100;
+// Collect all source names: start with HR_SOURCE_STATS keys, then add any SOURCES not yet covered
+var allSourceNames = [];
+var addedKeys = {};
 
-  // Best hire rates shown in green
-  var hireCell;
-  if (rate >= 40) {
-    hireCell = '<td style="color:#16A34A;font-weight:600;">' + s.hires + "</td>";
+if (typeof HR_SOURCE_STATS !== "undefined") {
+  for (var key in HR_SOURCE_STATS) {
+    if (HR_SOURCE_STATS.hasOwnProperty(key)) {
+      allSourceNames.push(key);
+      addedKeys[key] = true;
+    }
+  }
+}
+
+// Add any SOURCES entries that weren't in HR_SOURCE_STATS (e.g. "Agency")
+for (var i = 0; i < SOURCES.length; i++) {
+  var mappedKey = SOURCES[i].source;
+  if (mappedKey === "Referrals") mappedKey = "Employee Referral";
+  if (!addedKeys[mappedKey]) {
+    allSourceNames.push(mappedKey);
+    addedKeys[mappedKey] = true;
+  }
+}
+
+var tableHTML = "";
+for (var i = 0; i < allSourceNames.length; i++) {
+  var hrKey = allSourceNames[i];
+  var displayName = hrToDisplay[hrKey] || hrKey;
+
+  // Try to find matching pipeline data from SOURCES
+  var pipelineData = sourceLookup[displayName] || sourceLookup[hrKey] || null;
+
+  // Pipeline columns
+  var candidatesCell, hireCell, dropCell;
+  if (pipelineData) {
+    candidatesCell = "<td>" + pipelineData.candidates + "</td>";
+
+    var rate = (pipelineData.hires / pipelineData.candidates) * 100;
+    if (rate >= 40) {
+      hireCell = '<td style="color:#16A34A;font-weight:600;">' + pipelineData.hires + "</td>";
+    } else {
+      hireCell = "<td>" + pipelineData.hires + "</td>";
+    }
+
+    if (parseInt(pipelineData.dropOff) >= 35) {
+      dropCell = '<td style="color:#DC2626;font-weight:600;">' + pipelineData.dropOff + "</td>";
+    } else {
+      dropCell = "<td>" + pipelineData.dropOff + "</td>";
+    }
   } else {
-    hireCell = "<td>" + s.hires + "</td>";
+    candidatesCell = "<td>—</td>";
+    hireCell = "<td>—</td>";
+    dropCell = "<td>—</td>";
   }
 
-  // High drop-off rates shown in red
-  var dropCell;
-  if (parseInt(s.dropOff) >= 35) {
-    dropCell = '<td style="color:#DC2626;font-weight:600;">' + s.dropOff + "</td>";
-  } else {
-    dropCell = "<td>" + s.dropOff + "</td>";
+  // Predictive metrics from HR_SOURCE_STATS
+  var engagementCell = "<td>N/A</td>";
+  var turnoverCell = "<td>N/A</td>";
+
+  var stats = (typeof HR_SOURCE_STATS !== "undefined") ? HR_SOURCE_STATS[hrKey] : null;
+
+  if (stats && stats.count > 0) {
+    var avg = stats.avgEngagement.toFixed(2);
+    var turnStr = stats.turnoverPct + "%";
+
+    if (stats.avgEngagement < 4.0) {
+      engagementCell = '<td style="color:#DC2626;font-weight:600;">' + avg + ' / 5</td>';
+    } else {
+      engagementCell = '<td>' + avg + ' / 5</td>';
+    }
+
+    if (stats.turnoverPct >= 30) {
+      turnoverCell = '<td style="color:#DC2626;font-weight:600;">' + turnStr + '</td>';
+    } else {
+      turnoverCell = '<td>' + turnStr + '</td>';
+    }
   }
 
   tableHTML = tableHTML +
     "<tr>" +
-      "<td>" + s.source + "</td>" +
-      "<td>" + s.candidates + "</td>" +
+      "<td>" + displayName + "</td>" +
+      candidatesCell +
       hireCell +
       dropCell +
+      engagementCell +
+      turnoverCell +
     "</tr>";
 }
 document.querySelector("#sourceTable tbody").innerHTML = tableHTML;

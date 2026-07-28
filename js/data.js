@@ -107,3 +107,36 @@ function getDynamicTasks() {
 }
 
 loadSavedCandidates();
+
+// Parse a single line of CSV taking quotes into account (shared utility)
+function parseCSVLine(text) {
+  var ret = [];
+  var inQuote = false;
+  var value = "";
+  for (var i = 0; i < text.length; i++) {
+    var char = text[i];
+    if (inQuote) {
+      if (char === '"') {
+        if (i < text.length - 1 && text[i+1] === '"') {
+          value += '"';
+          i++; // skip escaped quote
+        } else {
+          inQuote = false;
+        }
+      } else {
+        value += char;
+      }
+    } else {
+      if (char === '"') {
+        inQuote = true;
+      } else if (char === ',') {
+        ret.push(value);
+        value = "";
+      } else {
+        value += char;
+      }
+    }
+  }
+  ret.push(value);
+  return ret;
+}
