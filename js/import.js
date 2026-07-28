@@ -48,6 +48,8 @@ function processCSV(text) {
   }
 
   var importedCount = 0;
+  var duplicateCount = 0;
+  var addedCandidates = [];
 
   for (var i = 1; i < lines.length; i++) {
     var line = lines[i].trim();
@@ -57,10 +59,24 @@ function processCSV(text) {
     }
 
     var cells = line.split(",");
+    var newName = cleanCell(cells[nameIndex]);
+
+    var isDuplicate = false;
+    for (var j = 0; j < CANDIDATES.length; j++) {
+      if (CANDIDATES[j].name.toLowerCase() === newName.toLowerCase()) {
+        isDuplicate = true;
+        break;
+      }
+    }
+
+    if (isDuplicate) {
+      duplicateCount++;
+      continue;
+    }
 
     var newCandidate = {
-      id: getNextCandidateId(),
-      name: cleanCell(cells[nameIndex]),
+      id: typeof getNextCandidateId === 'function' ? getNextCandidateId() : (CANDIDATES.length > 0 ? Math.max.apply(Math, CANDIDATES.map(function(c) { return c.id; })) + 1 : 1),
+      name: newName,
       role: cleanCell(cells[roleIndex]),
       dept: deptIndex !== -1 ? cleanCell(cells[deptIndex]) : "Unassigned",
       source: sourceIndex !== -1 ? cleanCell(cells[sourceIndex]) : "Import",
@@ -74,16 +90,32 @@ function processCSV(text) {
     };
 
     CANDIDATES.push(newCandidate);
-    importedCount = importedCount + 1;
+    addedCandidates.push(newCandidate);
+    importedCount++;
   }
 
   // This is the important new part:
-  saveCandidates();
+  if (importedCount > 0) {
+    saveCandidates();
+  }
 
-  message.textContent = "Successfully imported " + importedCount + " candidate(s)! They are now saved.";
-  message.className = "import-message success";
-
-  showPreview();
+  if (importedCount > 0 && duplicateCount === 0) {
+    message.textContent = "Successfully imported " + importedCount + " candidate(s)! They are now saved.";
+    message.className = "import-message success";
+    showPreview(addedCandidates);
+  } else if (importedCount > 0 && duplicateCount > 0) {
+    message.textContent = "Successfully imported " + importedCount + " candidate(s). " + duplicateCount + " duplicate(s) were skipped.";
+    message.className = "import-message success";
+    showPreview(addedCandidates);
+  } else if (importedCount === 0 && duplicateCount > 0) {
+    message.textContent = "All " + duplicateCount + " candidate(s) in the file are duplicates and were skipped.";
+    message.className = "import-message error";
+    document.getElementById("previewPanel").style.display = "none";
+  } else {
+    message.textContent = "No valid candidates found to import.";
+    message.className = "import-message error";
+    document.getElementById("previewPanel").style.display = "none";
+  }
 }
 
 
@@ -113,14 +145,15 @@ function cleanCell(value) {
 
 
 // Build the preview table showing all candidates
-function showPreview() {
+function showPreview(candidatesToShow) {
+  var list = candidatesToShow || CANDIDATES;
   var panel = document.getElementById("previewPanel");
   var body = document.querySelector("#previewTable tbody");
 
   var rowsHTML = "";
 
-  for (var i = 0; i < CANDIDATES.length; i++) {
-    var c = CANDIDATES[i];
+  for (var i = 0; i < list.length; i++) {
+    var c = list[i];
 
     rowsHTML = rowsHTML +
       "<tr>" +
