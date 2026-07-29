@@ -4,9 +4,8 @@
 window.HR_SOURCE_STATS = {};
 
 // We expose a promise so other scripts (like reports.js) can wait for the data
-window.hrDataPromise = fetch('data/HRDataset_v14.csv')
-  .then(response => response.text())
-  .then(text => {
+window.hrDataPromise = Promise.resolve().then(() => {
+    var text = window.RAW_CSV_DATA;
     var lines = text.trim().split('\n');
     var headers = parseCSVLine(lines[0]);
     var srcIndex = headers.indexOf('RecruitmentSource');

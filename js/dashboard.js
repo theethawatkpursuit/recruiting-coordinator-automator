@@ -18,7 +18,14 @@ document.getElementById("statsGrid").innerHTML = stats.map(s => `
 `).join("");
 
 // ---------- Priority Alerts ----------
-const alerts = CANDIDATES.filter(c => c.status !== "ok" || c.lastContact >= 7);
+const alerts = CANDIDATES
+  .filter(c => c.status !== "ok" || c.lastContact >= 7)
+  .sort((a, b) => {
+    let scoreA = a.lastContact + (a.status === "risk" ? 100 : (a.status === "action" ? 50 : 0));
+    let scoreB = b.lastContact + (b.status === "risk" ? 100 : (b.status === "action" ? 50 : 0));
+    return scoreB - scoreA;
+  })
+  .slice(0, 10);
 
 document.querySelector("#alertsTable tbody").innerHTML = alerts.map(c => {
   const b = statusBadge(c.status);

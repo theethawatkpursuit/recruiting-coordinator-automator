@@ -3,10 +3,12 @@
 // Count actual candidates currently in the system
 var totalCandidates = CANDIDATES.length;
 
-// Add up all hires from every source
+// Add up all hires from the active CANDIDATES array
 var totalHires = 0;
-for (var i = 0; i < SOURCES.length; i++) {
-  totalHires = totalHires + SOURCES[i].hires;
+for (var i = 0; i < CANDIDATES.length; i++) {
+  if (CANDIDATES[i].stage === "Offer") {
+    totalHires++;
+  }
 }
 
 // Count at-risk candidates
@@ -41,11 +43,28 @@ document.getElementById("reportStats").innerHTML = statsHTML;
 
 // ---------- Source Effectiveness Table ----------
 
-// Build a lookup from SOURCES for pipeline data, mapping display names to HR dataset names
+// Build a lookup dynamically from the CANDIDATES array
 var sourceLookup = {};
 var hrToDisplay = {};
-for (var i = 0; i < SOURCES.length; i++) {
-  sourceLookup[SOURCES[i].source] = SOURCES[i];
+
+for (var i = 0; i < CANDIDATES.length; i++) {
+  var c = CANDIDATES[i];
+  if (!sourceLookup[c.source]) {
+    sourceLookup[c.source] = { candidates: 0, hires: 0, dropOffs: 0 };
+  }
+  sourceLookup[c.source].candidates++;
+  
+  if (c.stage === "Offer") {
+    sourceLookup[c.source].hires++;
+  }
+  if (c.status === "risk") {
+    sourceLookup[c.source].dropOffs++;
+  }
+}
+
+for (var key in sourceLookup) {
+  var s = sourceLookup[key];
+  s.dropOff = Math.round((s.dropOffs / s.candidates) * 100) + "%";
 }
 
 // Collect all source names: start with HR_SOURCE_STATS keys, then add any SOURCES not yet covered
@@ -71,12 +90,11 @@ function renderSourceTable() {
     }
   }
 
-  // Add any SOURCES entries that weren't in HR_SOURCE_STATS (e.g. "Google Search")
-  for (var i = 0; i < SOURCES.length; i++) {
-    var mappedKey = SOURCES[i].source;
-    if (!addedKeys[mappedKey]) {
-      allSourceNames.push(mappedKey);
-      addedKeys[mappedKey] = true;
+  // Add any sources from CANDIDATES that weren't in HR_SOURCE_STATS
+  for (var key in sourceLookup) {
+    if (sourceLookup.hasOwnProperty(key) && !addedKeys[key]) {
+      allSourceNames.push(key);
+      addedKeys[key] = true;
     }
   }
 

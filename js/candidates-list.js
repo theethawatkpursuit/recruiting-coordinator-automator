@@ -1,13 +1,14 @@
 // Render candidates in a clean, perfectly aligned table layout
 
 var tableHTML = 
+  '<div style="max-height: calc(100vh - 220px); overflow-y: auto;">' +
   '<table class="data-table" style="width: 100%; border-collapse: collapse;">' +
-    '<thead>' +
+    '<thead style="position: sticky; top: 0; background: white; z-index: 10; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">' +
       '<tr>' +
-        '<th style="text-align: left; padding: 12px 16px;">Candidate</th>' +
-        '<th style="text-align: left; padding: 12px 16px;">Source</th>' +
-        '<th style="text-align: left; padding: 12px 16px;">Stage</th>' +
-        '<th style="text-align: right; padding: 12px 16px;">Status</th>' +
+        '<th style="text-align: left; padding: 12px 16px; border-bottom: 1px solid #e5e7eb;">Candidate</th>' +
+        '<th style="text-align: left; padding: 12px 16px; border-bottom: 1px solid #e5e7eb;">Source</th>' +
+        '<th style="text-align: left; padding: 12px 16px; border-bottom: 1px solid #e5e7eb;">Stage</th>' +
+        '<th style="text-align: right; padding: 12px 16px; border-bottom: 1px solid #e5e7eb;">Status</th>' +
       '</tr>' +
     '</thead>' +
     '<tbody>';
@@ -30,6 +31,6 @@ for (var i = 0; i < CANDIDATES.length; i++) {
     '</tr>';
 }
 
-tableHTML += '</tbody></table>';
+tableHTML += '</tbody></table></div>';
 
 document.getElementById("candidateList").innerHTML = tableHTML;
