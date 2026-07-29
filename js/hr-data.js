@@ -1,13 +1,55 @@
 // Auto-generated from HRDataset_v14.csv
 // Source-level predictive analytics
-var HR_SOURCE_STATS = {
-  'Indeed': { count: 87, avgEngagement: 3.99, avgSatisfaction: 3.94, turnoverPct: 24.1, terminated: 21 },
-  'Other': { count: 2, avgEngagement: 4.55, avgSatisfaction: 3.5, turnoverPct: 50, terminated: 1 },
-  'Website': { count: 13, avgEngagement: 4.22, avgSatisfaction: 3.38, turnoverPct: 7.7, terminated: 1 },
-  'LinkedIn': { count: 76, avgEngagement: 4.14, avgSatisfaction: 3.89, turnoverPct: 23.7, terminated: 18 },
-  'CareerBuilder': { count: 23, avgEngagement: 4.09, avgSatisfaction: 3.65, turnoverPct: 47.8, terminated: 11 },
-  'Employee Referral': { count: 31, avgEngagement: 4.19, avgSatisfaction: 3.94, turnoverPct: 16.1, terminated: 5 },
-  'On-line Web application': { count: 1, avgEngagement: 5, avgSatisfaction: 5, turnoverPct: 100, terminated: 1 },
-  'Diversity Job Fair': { count: 29, avgEngagement: 4.08, avgSatisfaction: 3.79, turnoverPct: 55.2, terminated: 16 },
-  'Google Search': { count: 49, avgEngagement: 4.19, avgSatisfaction: 4.06, turnoverPct: 61.2, terminated: 30 }
-};
+
+window.HR_SOURCE_STATS = {};
+
+// We expose a promise so other scripts (like reports.js) can wait for the data
+window.hrDataPromise = fetch('data/HRDataset_v14.csv')
+  .then(response => response.text())
+  .then(text => {
+    var lines = text.trim().split('\n');
+    var headers = parseCSVLine(lines[0]);
+    var srcIndex = headers.indexOf('RecruitmentSource');
+    var engIndex = headers.indexOf('EngagementSurvey');
+    var satIndex = headers.indexOf('EmpSatisfaction');
+    var termIndex = headers.indexOf('Termd');
+
+    if (srcIndex === -1 || engIndex === -1 || satIndex === -1 || termIndex === -1) {
+      console.error("Missing expected headers in CSV");
+      return;
+    }
+
+    var stats = {};
+
+    for (var i = 1; i < lines.length; i++) {
+      if (!lines[i].trim()) continue;
+      var cols = parseCSVLine(lines[i]);
+      var src = cols[srcIndex];
+      var eng = parseFloat(cols[engIndex]) || 0;
+      var sat = parseFloat(cols[satIndex]) || 0;
+      var term = parseInt(cols[termIndex], 10) || 0;
+
+      if (!stats[src]) {
+        stats[src] = { count: 0, sumEng: 0, sumSat: 0, terminated: 0 };
+      }
+      stats[src].count++;
+      stats[src].sumEng += eng;
+      stats[src].sumSat += sat;
+      stats[src].terminated += term;
+    }
+
+    for (var key in stats) {
+      var s = stats[key];
+      // Format properties like the static object had
+      window.HR_SOURCE_STATS[key] = {
+        count: s.count,
+        avgEngagement: Number((s.sumEng / s.count).toFixed(2)),
+        avgSatisfaction: Number((s.sumSat / s.count).toFixed(2)),
+        terminated: s.terminated,
+        turnoverPct: Number(((s.terminated / s.count) * 100).toFixed(1))
+      };
+    }
+    
+    return window.HR_SOURCE_STATS;
+  })
+  .catch(err => console.error("Error loading HR dataset:", err));

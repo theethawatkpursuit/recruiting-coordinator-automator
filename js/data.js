@@ -9,7 +9,7 @@ var CANDIDATES = [
   },
   {
     id: 2, name: "Jordan Lee", role: "Backend Engineer", dept: "Engineering",
-    source: "Referral", stage: "Final Round", lastContact: 4,
+    source: "Employee Referral", stage: "Final Round", lastContact: 4,
     manager: "Ana Torres", nextStep: "Request hiring manager feedback",
     status: "wait", interviewDate: "Completed May 2",
     notes: "Excellent system design round. Awaiting feedback from panel."
@@ -30,14 +30,14 @@ var CANDIDATES = [
   },
   {
     id: 5, name: "Leo Brown", role: "Backend Engineer", dept: "Engineering",
-    source: "Agency", stage: "New Applicant", lastContact: 3,
+    source: "Google Search", stage: "New Applicant", lastContact: 3,
     manager: "Ana Torres", nextStep: "Review application",
     status: "ok", interviewDate: "Not scheduled",
-    notes: "Agency-sourced candidate. Resume looks promising."
+    notes: "Google Search-sourced candidate. Resume looks promising."
   },
   {
     id: 6, name: "Emma Wilson", role: "UX Designer", dept: "Product",
-    source: "Referral", stage: "Offer", lastContact: 1,
+    source: "Employee Referral", stage: "Offer", lastContact: 1,
     manager: "Ravi Shah", nextStep: "Follow up on offer decision",
     status: "ok", interviewDate: "Completed Apr 28",
     notes: "Offer extended. Awaiting candidate decision."
@@ -63,8 +63,8 @@ const STAGES = ["New Applicant", "Screen", "Interview", "Final Round", "Offer"];
 const SOURCES = [
   { source: "LinkedIn",  candidates: 35, hires: 4, dropOff: "20%" },
   { source: "Indeed",    candidates: 28, hires: 2, dropOff: "35%" },
-  { source: "Referrals", candidates: 12, hires: 5, dropOff: "8%"  },
-  { source: "Agency",    candidates: 9,  hires: 1, dropOff: "40%" }
+  { source: "Employee Referral", candidates: 12, hires: 5, dropOff: "8%"  },
+  { source: "Google Search",    candidates: 9,  hires: 1, dropOff: "40%" }
 ];
 
 function statusBadge(status) {

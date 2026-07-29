@@ -43,7 +43,7 @@ document.getElementById("reportStats").innerHTML = statsHTML;
 
 // Build a lookup from SOURCES for pipeline data, mapping display names to HR dataset names
 var sourceLookup = {};
-var hrToDisplay = { "Employee Referral": "Referrals" };
+var hrToDisplay = {};
 for (var i = 0; i < SOURCES.length; i++) {
   sourceLookup[SOURCES[i].source] = SOURCES[i];
 }
@@ -52,24 +52,33 @@ for (var i = 0; i < SOURCES.length; i++) {
 var allSourceNames = [];
 var addedKeys = {};
 
-if (typeof HR_SOURCE_STATS !== "undefined") {
-  for (var key in HR_SOURCE_STATS) {
-    if (HR_SOURCE_STATS.hasOwnProperty(key)) {
-      allSourceNames.push(key);
-      addedKeys[key] = true;
-    }
-  }
+if (window.hrDataPromise) {
+  window.hrDataPromise.then(function() {
+    renderSourceTable();
+  });
+} else {
+  // Fallback if promise isn't defined
+  renderSourceTable();
 }
 
-// Add any SOURCES entries that weren't in HR_SOURCE_STATS (e.g. "Agency")
-for (var i = 0; i < SOURCES.length; i++) {
-  var mappedKey = SOURCES[i].source;
-  if (mappedKey === "Referrals") mappedKey = "Employee Referral";
-  if (!addedKeys[mappedKey]) {
-    allSourceNames.push(mappedKey);
-    addedKeys[mappedKey] = true;
+function renderSourceTable() {
+  if (typeof HR_SOURCE_STATS !== "undefined") {
+    for (var key in HR_SOURCE_STATS) {
+      if (HR_SOURCE_STATS.hasOwnProperty(key)) {
+        allSourceNames.push(key);
+        addedKeys[key] = true;
+      }
+    }
   }
-}
+
+  // Add any SOURCES entries that weren't in HR_SOURCE_STATS (e.g. "Google Search")
+  for (var i = 0; i < SOURCES.length; i++) {
+    var mappedKey = SOURCES[i].source;
+    if (!addedKeys[mappedKey]) {
+      allSourceNames.push(mappedKey);
+      addedKeys[mappedKey] = true;
+    }
+  }
 
 var tableHTML = "";
 for (var i = 0; i < allSourceNames.length; i++) {
@@ -125,18 +134,18 @@ for (var i = 0; i < allSourceNames.length; i++) {
     }
   }
 
-  tableHTML = tableHTML +
-    "<tr>" +
-      "<td>" + displayName + "</td>" +
-      candidatesCell +
-      hireCell +
-      dropCell +
-      engagementCell +
-      turnoverCell +
-    "</tr>";
+    tableHTML = tableHTML +
+      "<tr>" +
+        "<td>" + displayName + "</td>" +
+        candidatesCell +
+        hireCell +
+        dropCell +
+        engagementCell +
+        turnoverCell +
+      "</tr>";
+  }
+  document.querySelector("#sourceTable tbody").innerHTML = tableHTML;
 }
-document.querySelector("#sourceTable tbody").innerHTML = tableHTML;
-
 
 // ---------- Export Report Function ----------
 
