@@ -1,34 +1,29 @@
 // ---------- Report Stat Cards ----------
 
-// Count actual candidates currently in the system
-var totalCandidates = CANDIDATES.length;
+var totalCandidates = CANDIDATES.filter(function(c) { return isActiveCandidate(c); }).length;
 
-// Add up all hires from the active CANDIDATES array
 var totalHires = 0;
 for (var i = 0; i < CANDIDATES.length; i++) {
-  if (CANDIDATES[i].stage === "Offer") {
+  if (isHired(CANDIDATES[i])) {
     totalHires++;
   }
 }
 
-// Count at-risk candidates
 var riskCount = 0;
 for (var i = 0; i < CANDIDATES.length; i++) {
-  if (CANDIDATES[i].status === "risk") {
-    riskCount = riskCount + 1;
+  if (isAtRisk(CANDIDATES[i])) {
+    riskCount++;
   }
 }
 
-// Build the list of stat cards
 var reportStats = [
-  { num: 12, label: "Open Roles", cls: "" },
+  { num: getOpenRolesCount(), label: "Open Roles", cls: "" },
   { num: totalCandidates, label: "Candidates in Process", cls: "" },
   { num: riskCount, label: "At-Risk Candidates", cls: "warning" },
   { num: "28 days", label: "Avg. Time-to-Hire", cls: "" },
   { num: totalHires, label: "Total Hires", cls: "success" }
 ];
 
-// Turn each stat into HTML
 var statsHTML = "";
 for (var i = 0; i < reportStats.length; i++) {
   var s = reportStats[i];
@@ -43,31 +38,33 @@ document.getElementById("reportStats").innerHTML = statsHTML;
 
 // ---------- Source Effectiveness Table ----------
 
-// Build a lookup dynamically from the CANDIDATES array
 var sourceLookup = {};
 var hrToDisplay = {};
 
 for (var i = 0; i < CANDIDATES.length; i++) {
   var c = CANDIDATES[i];
-  if (!sourceLookup[c.source]) {
-    sourceLookup[c.source] = { candidates: 0, hires: 0, dropOffs: 0 };
+  var src = normalizeSource(c.source);
+
+  if (!sourceLookup[src]) {
+    sourceLookup[src] = { candidates: 0, hires: 0, firstRoundDropouts: 0 };
   }
-  sourceLookup[c.source].candidates++;
-  
-  if (c.stage === "Offer") {
-    sourceLookup[c.source].hires++;
+  sourceLookup[src].candidates++;
+
+  if (isHired(c)) {
+    sourceLookup[src].hires++;
   }
-  if (c.status === "risk") {
-    sourceLookup[c.source].dropOffs++;
+  if (isFirstRoundDropout(c)) {
+    sourceLookup[src].firstRoundDropouts++;
   }
 }
 
 for (var key in sourceLookup) {
   var s = sourceLookup[key];
-  s.dropOff = Math.round((s.dropOffs / s.candidates) * 100) + "%";
+  s.dropOff = s.candidates > 0
+    ? Math.round((s.firstRoundDropouts / s.candidates) * 100) + "%"
+    : "0%";
 }
 
-// Collect all source names: start with HR_SOURCE_STATS keys, then add any SOURCES not yet covered
 var allSourceNames = [];
 var addedKeys = {};
 
@@ -76,81 +73,77 @@ if (window.hrDataPromise) {
     renderSourceTable();
   });
 } else {
-  // Fallback if promise isn't defined
   renderSourceTable();
 }
 
 function renderSourceTable() {
+  // Collect the set of sources present in the HR dataset.
+  var hrSourceKeys = {};
   if (typeof HR_SOURCE_STATS !== "undefined") {
     for (var key in HR_SOURCE_STATS) {
       if (HR_SOURCE_STATS.hasOwnProperty(key)) {
-        allSourceNames.push(key);
-        addedKeys[key] = true;
+        hrSourceKeys[key] = true;
       }
     }
   }
 
-  // Add any sources from CANDIDATES that weren't in HR_SOURCE_STATS
+  // Only show sources that appear in BOTH the HR dataset and the applicant
+  // pipeline (i.e. sources shared between the two datasets).
   for (var key in sourceLookup) {
-    if (sourceLookup.hasOwnProperty(key) && !addedKeys[key]) {
+    if (sourceLookup.hasOwnProperty(key) && hrSourceKeys[key] && !addedKeys[key]) {
       allSourceNames.push(key);
       addedKeys[key] = true;
     }
   }
 
-var tableHTML = "";
-for (var i = 0; i < allSourceNames.length; i++) {
-  var hrKey = allSourceNames[i];
-  var displayName = hrToDisplay[hrKey] || hrKey;
+  var tableHTML = "";
+  for (var i = 0; i < allSourceNames.length; i++) {
+    var hrKey = allSourceNames[i];
+    var displayName = hrToDisplay[hrKey] || hrKey;
+    var pipelineData = sourceLookup[displayName] || sourceLookup[hrKey] || null;
 
-  // Try to find matching pipeline data from SOURCES
-  var pipelineData = sourceLookup[displayName] || sourceLookup[hrKey] || null;
+    var candidatesCell, hireCell, dropCell;
+    if (pipelineData) {
+      candidatesCell = "<td>" + pipelineData.candidates + "</td>";
 
-  // Pipeline columns
-  var candidatesCell, hireCell, dropCell;
-  if (pipelineData) {
-    candidatesCell = "<td>" + pipelineData.candidates + "</td>";
+      var rate = (pipelineData.hires / pipelineData.candidates) * 100;
+      if (rate >= 40) {
+        hireCell = '<td style="color:#16A34A;font-weight:600;">' + pipelineData.hires + "</td>";
+      } else {
+        hireCell = "<td>" + pipelineData.hires + "</td>";
+      }
 
-    var rate = (pipelineData.hires / pipelineData.candidates) * 100;
-    if (rate >= 40) {
-      hireCell = '<td style="color:#16A34A;font-weight:600;">' + pipelineData.hires + "</td>";
+      if (parseInt(pipelineData.dropOff) >= 35) {
+        dropCell = '<td style="color:#DC2626;font-weight:600;">' + pipelineData.dropOff + "</td>";
+      } else {
+        dropCell = "<td>" + pipelineData.dropOff + "</td>";
+      }
     } else {
-      hireCell = "<td>" + pipelineData.hires + "</td>";
+      candidatesCell = "<td>—</td>";
+      hireCell = "<td>—</td>";
+      dropCell = "<td>—</td>";
     }
 
-    if (parseInt(pipelineData.dropOff) >= 35) {
-      dropCell = '<td style="color:#DC2626;font-weight:600;">' + pipelineData.dropOff + "</td>";
-    } else {
-      dropCell = "<td>" + pipelineData.dropOff + "</td>";
+    var engagementCell = "<td>N/A</td>";
+    var turnoverCell = "<td>N/A</td>";
+    var stats = (typeof HR_SOURCE_STATS !== "undefined") ? HR_SOURCE_STATS[hrKey] : null;
+
+    if (stats && stats.count > 0) {
+      var avg = stats.avgEngagement.toFixed(2);
+      var turnStr = stats.turnoverPct + "%";
+
+      if (stats.avgEngagement < 4.0) {
+        engagementCell = '<td style="color:#DC2626;font-weight:600;">' + avg + ' / 5</td>';
+      } else {
+        engagementCell = '<td>' + avg + ' / 5</td>';
+      }
+
+      if (stats.turnoverPct >= 30) {
+        turnoverCell = '<td style="color:#DC2626;font-weight:600;">' + turnStr + '</td>';
+      } else {
+        turnoverCell = '<td>' + turnStr + '</td>';
+      }
     }
-  } else {
-    candidatesCell = "<td>—</td>";
-    hireCell = "<td>—</td>";
-    dropCell = "<td>—</td>";
-  }
-
-  // Predictive metrics from HR_SOURCE_STATS
-  var engagementCell = "<td>N/A</td>";
-  var turnoverCell = "<td>N/A</td>";
-
-  var stats = (typeof HR_SOURCE_STATS !== "undefined") ? HR_SOURCE_STATS[hrKey] : null;
-
-  if (stats && stats.count > 0) {
-    var avg = stats.avgEngagement.toFixed(2);
-    var turnStr = stats.turnoverPct + "%";
-
-    if (stats.avgEngagement < 4.0) {
-      engagementCell = '<td style="color:#DC2626;font-weight:600;">' + avg + ' / 5</td>';
-    } else {
-      engagementCell = '<td>' + avg + ' / 5</td>';
-    }
-
-    if (stats.turnoverPct >= 30) {
-      turnoverCell = '<td style="color:#DC2626;font-weight:600;">' + turnStr + '</td>';
-    } else {
-      turnoverCell = '<td>' + turnStr + '</td>';
-    }
-  }
 
     tableHTML = tableHTML +
       "<tr>" +
@@ -173,10 +166,8 @@ function exportCandidatesCSV() {
     return;
   }
 
-  // 1. Column Headers
   var headers = ["ID", "Name", "Role", "Department", "Source", "Stage", "Status", "Last Contact (Days)", "Hiring Manager", "Next Step", "Notes"];
 
-  // 2. Build Rows
   var csvRows = [headers.join(",")];
 
   for (var i = 0; i < CANDIDATES.length; i++) {
@@ -186,9 +177,9 @@ function exportCandidatesCSV() {
       '"' + (c.name || '') + '"',
       '"' + (c.role || '') + '"',
       '"' + (c.dept || '') + '"',
-      '"' + (c.source || '') + '"',
+      '"' + (normalizeSource(c.source) || '') + '"',
       '"' + (c.stage || '') + '"',
-      '"' + (c.status || '') + '"',
+      '"' + (effectiveStatus(c) || '') + '"',
       c.lastContact,
       '"' + (c.manager || '') + '"',
       '"' + (c.nextStep || '') + '"',
@@ -197,7 +188,6 @@ function exportCandidatesCSV() {
     csvRows.push(row.join(","));
   }
 
-  // 3. Create blob and download
   var csvString = csvRows.join("\n");
   var blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
   var link = document.createElement("a");

@@ -15,7 +15,7 @@ var tableHTML =
 
 for (var i = 0; i < CANDIDATES.length; i++) {
   var c = CANDIDATES[i];
-  var b = statusBadge(c.status);
+  var b = statusBadge(effectiveStatus(c));
 
   tableHTML +=
     '<tr onclick="window.location=\'candidate.html?id=' + c.id + '\'" style="cursor: pointer;" class="candidate-row-tr">' +
@@ -23,7 +23,7 @@ for (var i = 0; i < CANDIDATES.length; i++) {
         '<div style="font-weight: 600;">' + c.name + '</div>' +
         '<div style="font-size: 13px; color: #6B7280;">' + c.role + ' - ' + c.dept + '</div>' +
       '</td>' +
-      '<td style="padding: 12px 16px;"><span class="source-tag">' + c.source + '</span></td>' +
+      '<td style="padding: 12px 16px;"><span class="source-tag">' + normalizeSource(c.source) + '</span></td>' +
       '<td style="padding: 12px 16px;">' + c.stage + '</td>' +
       '<td style="padding: 12px 16px; text-align: right;">' +
         '<span class="badge ' + b.cls + '">' + b.text + '</span>' +

@@ -23,7 +23,9 @@ window.hrDataPromise = Promise.resolve().then(() => {
     for (var i = 1; i < lines.length; i++) {
       if (!lines[i].trim()) continue;
       var cols = parseCSVLine(lines[i]);
-      var src = cols[srcIndex];
+      // Normalize the raw HR source name so it matches the applicant-facing
+      // source labels (e.g. "Website" / "On-line Web application" -> "Company Website").
+      var src = normalizeSource(cols[srcIndex]);
       var eng = parseFloat(cols[engIndex]) || 0;
       var sat = parseFloat(cols[satIndex]) || 0;
       var term = parseInt(cols[termIndex], 10) || 0;

@@ -79,7 +79,7 @@ function processCSV(text) {
       name: newName,
       role: cleanCell(cells[roleIndex]),
       dept: deptIndex !== -1 ? cleanCell(cells[deptIndex]) : "Unassigned",
-      source: sourceIndex !== -1 ? cleanCell(cells[sourceIndex]) : "Import",
+      source: sourceIndex !== -1 ? normalizeSource(cleanCell(cells[sourceIndex])) : "Import",
       stage: stageIndex !== -1 ? cleanCell(cells[stageIndex]) : "New Applicant",
       lastContact: 0,
       manager: "Unassigned",

@@ -25,7 +25,7 @@ function renderBoard() {
 
   document.getElementById("kanban").innerHTML = STAGES.map(stage => {
     const cards = filtered.filter(c => c.stage === stage).map(c => {
-      const b = statusBadge(c.status);
+      const b = statusBadge(effectiveStatus(c));
       return `
         <div class="kanban-card" onclick="location.href='candidate.html?id=${c.id}'">
           <div class="name">${c.name}</div>

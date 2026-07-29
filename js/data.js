@@ -1,4 +1,5 @@
 // Shared candidate data used across all pages.
+const DATA_VERSION = 2;
 var CANDIDATES = [
   {
     id: 1, name: "Maya Chen", role: "UX Designer", dept: "Product",
@@ -37,10 +38,10 @@ var CANDIDATES = [
   },
   {
     id: 6, name: "Emma Wilson", role: "UX Designer", dept: "Product",
-    source: "Employee Referral", stage: "Offer", lastContact: 1,
-    manager: "Ravi Shah", nextStep: "Follow up on offer decision",
+    source: "Employee Referral", stage: "Hired", lastContact: 1,
+    manager: "Ravi Shah", nextStep: "Complete onboarding",
     status: "ok", interviewDate: "Completed Apr 28",
-    notes: "Offer extended. Awaiting candidate decision."
+    notes: "Offer accepted. Starting next month."
   },
   {
     id: 7, name: "Noah King", role: "Product Manager", dept: "Product",
@@ -93,10 +94,10 @@ var CANDIDATES = [
   },
   {
     id: 14, name: "Susan Smith", role: "Software Engineer", dept: "Engineering",
-    source: "Other", stage: "Interview", lastContact: 13,
-    manager: "Kissy Sullivan", nextStep: "Send rejection email",
+    source: "Other", stage: "Rejected", rejectedAtStage: "Interview", lastContact: 13,
+    manager: "Kissy Sullivan", nextStep: "Archive candidate",
     status: "ok", interviewDate: "Completed May 7",
-    notes: "Salary expectations are too high."
+    notes: "Withdrew after first interview round."
   },
   {
     id: 15, name: "Michael Thomas", role: "Software Engineer", dept: "Engineering",
@@ -114,17 +115,17 @@ var CANDIDATES = [
   },
   {
     id: 17, name: "Barbara Martin", role: "HR Manager", dept: "HR",
-    source: "CareerBuilder", stage: "Final Round", lastContact: 2,
-    manager: "Ana Torres", nextStep: "Follow up on offer decision",
-    status: "action", interviewDate: "Completed May 10",
-    notes: "Excellent communication skills."
+    source: "CareerBuilder", stage: "Hired", lastContact: 2,
+    manager: "Ana Torres", nextStep: "Complete onboarding",
+    status: "ok", interviewDate: "Completed May 10",
+    notes: "Excellent communication skills. Offer accepted."
   },
   {
     id: 18, name: "Jessica Gonzalez", role: "Data Scientist", dept: "Engineering",
-    source: "Other", stage: "Offer", lastContact: 5,
-    manager: "Michael Albert", nextStep: "Send rejection email",
-    status: "risk", interviewDate: "Completed May 19",
-    notes: "Waiting for feedback from the panel."
+    source: "Other", stage: "Rejected", rejectedAtStage: "Screen", lastContact: 5,
+    manager: "Michael Albert", nextStep: "Archive candidate",
+    status: "ok", interviewDate: "Completed May 19",
+    notes: "Did not pass recruiter screen."
   },
   {
     id: 19, name: "Michael Smith", role: "UX Designer", dept: "Product",
@@ -219,8 +220,8 @@ var CANDIDATES = [
   },
   {
     id: 32, name: "William Davis", role: "UX Designer", dept: "Product",
-    source: "On-line Web application", stage: "Interview", lastContact: 13,
-    manager: "Dan Kim", nextStep: "Send rejection email",
+    source: "On-line Web application", stage: "Rejected", rejectedAtStage: "Interview", lastContact: 13,
+    manager: "Dan Kim", nextStep: "Archive candidate",
     status: "ok", interviewDate: "Completed May 4",
     notes: "Did not pass the initial screening."
   },
@@ -270,13 +271,57 @@ var CANDIDATES = [
 ];
 
 const STAGES = ["New Applicant", "Screen", "Interview", "Final Round", "Offer"];
+const TERMINAL_STAGES = ["Hired", "Rejected"];
+const ALL_STAGES = STAGES.concat(TERMINAL_STAGES);
+const COLD_CONTACT_DAYS = 10;
+const FIRST_ROUND_STAGES = ["New Applicant", "Screen", "Interview"];
 
-const SOURCES = [
-  { source: "LinkedIn",  candidates: 35, hires: 4, dropOff: "20%" },
-  { source: "Indeed",    candidates: 28, hires: 2, dropOff: "35%" },
-  { source: "Employee Referral", candidates: 12, hires: 5, dropOff: "8%"  },
-  { source: "Google Search",    candidates: 9,  hires: 1, dropOff: "40%" }
-];
+const SOURCE_ALIASES = {
+  "Referral": "Employee Referral",
+  "Employee Referral": "Employee Referral",
+  "LinkedIn": "LinkedIn",
+  "Indeed": "Indeed",
+  "Google Search": "Google Search",
+  "CareerBuilder": "CareerBuilder",
+  "Website": "Company Website",
+  "On-line Web application": "Company Website",
+  "Other": "Other",
+  "Diversity Job Fair": "Diversity Job Fair"
+};
+
+function normalizeSource(source) {
+  return SOURCE_ALIASES[source] || source;
+}
+
+function isActiveCandidate(c) {
+  return TERMINAL_STAGES.indexOf(c.stage) === -1;
+}
+
+function isAtRisk(c) {
+  return isActiveCandidate(c) && c.lastContact >= COLD_CONTACT_DAYS;
+}
+
+function effectiveStatus(c) {
+  if (isAtRisk(c)) return "risk";
+  return c.status || "ok";
+}
+
+function isHired(c) {
+  return c.stage === "Hired";
+}
+
+function isFirstRoundDropout(c) {
+  if (c.stage !== "Rejected") return false;
+  return FIRST_ROUND_STAGES.indexOf(c.rejectedAtStage) !== -1;
+}
+
+function getOpenRolesCount() {
+  var roles = {};
+  CANDIDATES.forEach(function(c) {
+    if (isActiveCandidate(c)) roles[c.role] = true;
+  });
+  return Object.keys(roles).length;
+}
 
 function statusBadge(status) {
   switch (status) {
@@ -289,18 +334,16 @@ function statusBadge(status) {
 
 function saveCandidates() {
   localStorage.setItem("recruitflowCandidates", JSON.stringify(CANDIDATES));
+  localStorage.setItem("recruitflowDataVersion", String(DATA_VERSION));
 }
 
 function loadSavedCandidates() {
   var saved = localStorage.getItem("recruitflowCandidates");
-  if (saved !== null) {
-    var parsed = JSON.parse(saved);
-    // If we have added new candidates to the static array, overwrite the local storage cache
-    if (parsed.length < CANDIDATES.length) {
-      saveCandidates();
-    } else {
-      CANDIDATES = parsed;
-    }
+  var savedVersion = localStorage.getItem("recruitflowDataVersion");
+  if (saved !== null && savedVersion === String(DATA_VERSION)) {
+    CANDIDATES = JSON.parse(saved);
+  } else {
+    saveCandidates();
   }
 }
 
@@ -311,7 +354,7 @@ function getDynamicTasks() {
   const upcoming = [];
 
   CANDIDATES.forEach(c => {
-    if (c.status === "risk" || c.lastContact >= 7) {
+    if (isAtRisk(c)) {
       overdue.push(`Send update to ${c.name} (no contact in ${c.lastContact} days)`);
     } else if (c.status === "action" || c.status === "wait") {
       today.push(`${c.nextStep} for ${c.name}`);

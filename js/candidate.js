@@ -81,8 +81,8 @@ function showCandidateDetail(candidate) {
           '<p>' + candidate.role + ' — ' + candidate.dept + '</p>' +
         '</div>' +
         '<div style="display: flex; gap: 10px; align-items: center;">' +
-          '<span class="badge ' + statusBadge(candidate.status).cls + '">' +
-            statusBadge(candidate.status).text +
+          '<span class="badge ' + statusBadge(effectiveStatus(candidate)).cls + '">' +
+            statusBadge(effectiveStatus(candidate)).text +
           '</span>' +
           '<button class="btn-secondary" onclick="toggleEditMode(true)">Edit Profile</button>' +
         '</div>' +
@@ -96,7 +96,7 @@ function showCandidateDetail(candidate) {
 
         '<div class="detail-item">' +
           '<strong>Source</strong>' +
-          '<span><span class="source-tag">' + candidate.source + '</span></span>' +
+          '<span><span class="source-tag">' + normalizeSource(candidate.source) + '</span></span>' +
         '</div>' +
 
         '<div class="detail-item">' +
@@ -106,7 +106,9 @@ function showCandidateDetail(candidate) {
 
         '<div class="detail-item">' +
           '<strong>Last Contact</strong>' +
-          '<span>' + candidate.lastContact + ' days ago</span>' +
+          '<span>' + candidate.lastContact + ' days ago' +
+            (isAtRisk(candidate) ? ' <span class="badge badge-risk" style="margin-left:8px;">Going Cold</span>' : '') +
+          '</span>' +
         '</div>' +
 
         '<div class="detail-item">' +
@@ -156,10 +158,18 @@ function showCandidateDetail(candidate) {
 // --- EDIT MODE FORM ---
 function showEditForm(candidate) {
   var stageOptions = "";
-  for (var s = 0; s < STAGES.length; s++) {
-    var selected = STAGES[s] === candidate.stage ? " selected" : "";
-    stageOptions += '<option value="' + STAGES[s] + '"' + selected + '>' + STAGES[s] + '</option>';
+  for (var s = 0; s < ALL_STAGES.length; s++) {
+    var selected = ALL_STAGES[s] === candidate.stage ? " selected" : "";
+    stageOptions += '<option value="' + ALL_STAGES[s] + '"' + selected + '>' + ALL_STAGES[s] + '</option>';
   }
+
+  var rejectedStageOptions = "";
+  for (var r = 0; r < FIRST_ROUND_STAGES.length; r++) {
+    var rejSelected = candidate.rejectedAtStage === FIRST_ROUND_STAGES[r] ? " selected" : "";
+    rejectedStageOptions += '<option value="' + FIRST_ROUND_STAGES[r] + '"' + rejSelected + '>' + FIRST_ROUND_STAGES[r] + '</option>';
+  }
+
+  var showRejectedAt = candidate.stage === "Rejected";
 
   var statusOptions =
     '<option value="ok"' + (candidate.status === "ok" ? " selected" : "") + '>On Track</option>' +
@@ -197,9 +207,13 @@ function showEditForm(candidate) {
         '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">' +
           '<div>' +
             '<label><strong>Stage</strong></label>' +
-            '<select id="editStage" style="width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px;">' + stageOptions + '</select>' +
+            '<select id="editStage" onchange="toggleRejectedAtStage()" style="width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px;">' + stageOptions + '</select>' +
           '</div>' +
-          '<div>' +
+          '<div id="rejectedAtStageField" style="' + (showRejectedAt ? '' : 'display:none;') + '">' +
+            '<label><strong>Dropped Off After</strong></label>' +
+            '<select id="editRejectedAtStage" style="width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px;">' + rejectedStageOptions + '</select>' +
+          '</div>' +
+          '<div id="statusAlertField" style="' + (showRejectedAt ? 'display:none;' : '') + '">' +
             '<label><strong>Status Alert</strong></label>' +
             '<select id="editStatus" style="width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px;">' + statusOptions + '</select>' +
           '</div>' +
@@ -238,6 +252,16 @@ function showEditForm(candidate) {
 }
 
 
+// Show/hide rejected-at-stage field when stage changes in edit form
+function toggleRejectedAtStage() {
+  var stage = document.getElementById("editStage").value;
+  var rejectedField = document.getElementById("rejectedAtStageField");
+  var statusField = document.getElementById("statusAlertField");
+  if (rejectedField) rejectedField.style.display = stage === "Rejected" ? "" : "none";
+  if (statusField) statusField.style.display = stage === "Rejected" ? "none" : "";
+}
+
+
 // Switch between View Mode and Edit Mode
 function toggleEditMode(enable) {
   isEditing = enable;
@@ -252,9 +276,20 @@ function saveCandidateEdits(event) {
   selectedCandidate.name = document.getElementById("editName").value;
   selectedCandidate.role = document.getElementById("editRole").value;
   selectedCandidate.dept = document.getElementById("editDept").value;
-  selectedCandidate.source = document.getElementById("editSource").value;
   selectedCandidate.stage = document.getElementById("editStage").value;
-  selectedCandidate.status = document.getElementById("editStatus").value;
+  selectedCandidate.source = document.getElementById("editSource").value;
+
+  if (selectedCandidate.stage === "Rejected") {
+    var rejectedEl = document.getElementById("editRejectedAtStage");
+    selectedCandidate.rejectedAtStage = rejectedEl ? rejectedEl.value : "Screen";
+    delete selectedCandidate.status;
+  } else if (selectedCandidate.stage === "Hired") {
+    delete selectedCandidate.rejectedAtStage;
+    selectedCandidate.status = "ok";
+  } else {
+    delete selectedCandidate.rejectedAtStage;
+    selectedCandidate.status = document.getElementById("editStatus").value;
+  }
   selectedCandidate.manager = document.getElementById("editManager").value;
   selectedCandidate.nextStep = document.getElementById("editNextStep").value;
   selectedCandidate.notes = document.getElementById("editNotes").value;
@@ -268,9 +303,10 @@ function saveCandidateEdits(event) {
     var daysAgo = Math.floor(diffMs / (1000 * 60 * 60 * 24));
     selectedCandidate.lastContact = daysAgo;
 
-    // Auto-set risk status if 7+ days ago
-    if (daysAgo >= 7) {
+    if (daysAgo >= COLD_CONTACT_DAYS && isActiveCandidate(selectedCandidate)) {
       selectedCandidate.status = "risk";
+    } else if (selectedCandidate.status === "risk" && daysAgo < COLD_CONTACT_DAYS) {
+      selectedCandidate.status = "ok";
     }
   }
 
