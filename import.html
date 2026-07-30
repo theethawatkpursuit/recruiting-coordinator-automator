@@ -5,7 +5,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>RecruitFlow — Import Candidates</title>
+  <title>RecruitFlow — Import</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -16,41 +16,63 @@
   <main class="content">
     <!-- Page header with title and description -->
     <header class="page-header">
-      <h1>Import Candidates</h1>
-      <p>Upload a spreadsheet (.csv) to add candidates in bulk</p>
+      <h1>Import</h1>
+      <p>Upload a spreadsheet (.csv) to add candidates in bulk or load HR data for source effectiveness</p>
     </header>
 
-    <!-- Instructions panel: explains the required CSV format and offers a template download -->
+    <!-- Instructions panel for candidate import: explains the required CSV format and offers a template download -->
     <section class="panel">
-      <h2>How to Import</h2>
+      <h2>How To Import/Add Candidates</h2>
       <ol class="import-steps" style="padding-left: 0; margin-left: 0; list-style-position: inside; margin-top: 15px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px;">
         <li style="margin: 0; line-height: 1.5;">In Excel or Google Sheets, make sure your columns are:
           <code>name, role, dept, source, stage</code></li>
         <li style="margin: 0; line-height: 1.5;">Save / download the file as <strong>CSV</strong>.</li>
-        <li style="margin: 0; line-height: 1.5;">Choose the file below and click <strong>Import</strong>.</li>
+        <li style="margin: 0; line-height: 1.5;">Choose the file below and click <strong>Import Candidates</strong>.</li>
       </ol>
       <a href="data/candidate-template.csv" download class="btn-secondary btn-small" style="display: inline-block;">
         Download Template
       </a>
     </section>
 
-    <!-- Upload panel: file picker and import button; processing handled by importFile() and
-         processCSV() in js/import.js. #fileInput and #importMessage are read/written by those functions. -->
+    <!-- Instructions panel for HR data import: explains the required CSV format for source effectiveness -->
     <section class="panel">
-      <h2>Upload File</h2>
-      <input type="file" id="fileInput" accept=".csv" class="file-input">
-      <button class="btn-primary" onclick="importFile()">Import</button>
-      <p id="importMessage" class="import-message"></p>
+      <h2>How To Import HR Data For Source Effectiveness</h2>
+      <ol class="import-steps" style="padding-left: 0; margin-left: 0; list-style-position: inside; margin-top: 15px; margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px;">
+        <li style="margin: 0; line-height: 1.5;">In Excel or Google Sheets, make sure your columns include:
+          <code>RecruitmentSource, EngagementSurvey, Termd</code></li>
+        <li style="margin: 0; line-height: 1.5;"><code>RecruitmentSource</code> is the hiring source name, <code>EngagementSurvey</code> is a score from 0–5, and <code>Termd</code> is 1 if the employee was terminated or 0 if still employed.</li>
+        <li style="margin: 0; line-height: 1.5;">Save / download the file as <strong>CSV</strong>.</li>
+        <li style="margin: 0; line-height: 1.5;">Choose the file below and click <strong>Import HR Data</strong>.</li>
+      </ol>
+      <a href="data/hr-template.csv" download class="btn-secondary btn-small" style="display: inline-block;">
+        Download Template
+      </a>
     </section>
 
-    <!-- Preview panel: hidden until import succeeds; shows the imported candidates in a table.
-         #previewPanel and #previewTable are populated by showPreview() in js/import.js. -->
+    <!-- Upload panel for candidates: file picker and import button; processing handled by importFile() and
+         processCSV() in js/import.js. #candidateFileInput and #candidateImportMessage are read/written by those functions. -->
+    <section class="panel">
+      <h2>Upload Candidates File</h2>
+      <input type="file" id="candidateFileInput" accept=".csv" class="file-input">
+      <button class="btn-primary" onclick="importFile()">Import Candidates</button>
+      <p id="candidateImportMessage" class="import-message"></p>
+    </section>
+
+    <!-- Upload panel for HR data: file picker and import button; processing handled by importHRFile() and
+         processHRCSV() in js/import.js. #hrFileInput and #hrImportMessage are read/written by those functions. -->
+    <section class="panel">
+      <h2>Upload HR Data File</h2>
+      <input type="file" id="hrFileInput" accept=".csv" class="file-input">
+      <button class="btn-primary" onclick="importHRFile()">Import HR Data</button>
+      <p id="hrImportMessage" class="import-message"></p>
+    </section>
+
+    <!-- Preview panel: hidden until an import succeeds; shows the imported data in a table.
+         #previewPanel and #previewTable are populated by showPreview()/showHRPreview() in js/import.js. -->
     <section class="panel" id="previewPanel" style="display:none;">
-      <h2>Imported Candidates</h2>
+      <h2 id="previewTitle">Imported Data</h2>
       <table class="data-table" id="previewTable">
-        <thead>
-          <tr><th>Name</th><th>Role</th><th>Department</th><th>Source</th><th>Stage</th></tr>
-        </thead>
+        <thead id="previewHead"></thead>
         <tbody></tbody>
       </table>
     </section>

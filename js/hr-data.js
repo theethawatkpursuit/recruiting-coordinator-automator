@@ -1,6 +1,9 @@
-// Auto-generated from HRDataset_v14.csv
 // Source-level predictive analytics: aggregates employee engagement, satisfaction,
 // and turnover by recruitment source so the Reports page can compare sources.
+//
+// Data source priority:
+//   1. HR stats imported via the Import page (stored in localStorage as "recruitflowHRStats")
+//   2. The default HR dataset embedded by hr-dataset-raw.js
 
 // Global object that will hold the computed per-source statistics.
 window.HR_SOURCE_STATS = {};
@@ -8,8 +11,28 @@ window.HR_SOURCE_STATS = {};
 // We expose a promise so other scripts (like reports.js) can wait for the data
 // to finish parsing before rendering the source effectiveness table.
 window.hrDataPromise = Promise.resolve().then(() => {
+    // First, check if the user has imported HR data via the Import page.
+    // Imported stats are stored as JSON in localStorage and take precedence
+    // over the default embedded dataset.
+    var savedHRStats = localStorage.getItem("recruitflowHRStats");
+    if (savedHRStats !== null) {
+      try {
+        window.HR_SOURCE_STATS = JSON.parse(savedHRStats);
+        return window.HR_SOURCE_STATS;
+      } catch (e) {
+        console.error("Error parsing saved HR stats:", e);
+        // Fall through to the default dataset if parsing fails.
+      }
+    }
+
+    // No imported data (or parse error): fall back to the default embedded dataset.
     // Read the raw CSV string embedded by hr-dataset-raw.js and split it into lines.
     var text = window.RAW_CSV_DATA;
+    if (!text) {
+      console.error("No HR dataset available (neither imported nor default).");
+      return;
+    }
+
     var lines = text.trim().split('\n');
     // Parse the header row and locate the column indices we need.
     // parseCSVLine is defined in js/data.js.
