@@ -262,3 +262,73 @@ function exportCandidatesCSV() {
   link.click();
   document.body.removeChild(link);
 }
+
+// ---------- Export Source Effectiveness Report Function ----------
+// Export the Source Effectiveness table to a CSV file and trigger a browser download.
+// Includes one row per shared source with: Source, Candidates, Hires,
+// First-Round Drop-Off, Avg. Engagement, and Turnover Rate.
+function exportSourceEffectivenessCSV() {
+  // Abort if there are no shared sources to export.
+  if (!allSourceNames || allSourceNames.length === 0) {
+    alert("No source effectiveness data available to export.");
+    return;
+  }
+
+  // Define the CSV column headers matching the Source Effectiveness table.
+  var headers = ["Source", "Candidates", "Hires", "First-Round Drop-Off", "Avg. Engagement", "Turnover Rate"];
+
+  // Start the CSV with the header row.
+  var csvRows = [headers.join(",")];
+
+  // Recompute the max values so the exported data matches what's displayed.
+  var expMaxHires = 0;
+  var expMaxDropOff = -1;
+  for (var i = 0; i < allSourceNames.length; i++) {
+    var hrKeyE = allSourceNames[i];
+    var displayNameE = hrToDisplay[hrKeyE] || hrKeyE;
+    var pipelineDataE = sourceLookup[displayNameE] || sourceLookup[hrKeyE] || null;
+    if (pipelineDataE) {
+      if (pipelineDataE.hires > expMaxHires) expMaxHires = pipelineDataE.hires;
+      var dropPctE = parseInt(pipelineDataE.dropOff, 10);
+      if (dropPctE > expMaxDropOff) expMaxDropOff = dropPctE;
+    }
+  }
+
+  // Build a CSV row for each shared source, quoting text fields and escaping inner quotes.
+  for (var i = 0; i < allSourceNames.length; i++) {
+    var hrKey = allSourceNames[i];
+    var displayName = hrToDisplay[hrKey] || hrKey;
+    var pipelineData = sourceLookup[displayName] || sourceLookup[hrKey] || null;
+    var stats = (typeof HR_SOURCE_STATS !== "undefined") ? HR_SOURCE_STATS[hrKey] : null;
+
+    // Gather the six column values, falling back to "N/A" where data is missing.
+    var candidatesVal = pipelineData ? pipelineData.candidates : "N/A";
+    var hiresVal = pipelineData ? pipelineData.hires : "N/A";
+    var dropOffVal = pipelineData ? pipelineData.dropOff : "N/A";
+    var engagementVal = (stats && stats.count > 0) ? (stats.avgEngagement.toFixed(2) + " / 5") : "N/A";
+    var turnoverVal = (stats && stats.count > 0) ? (stats.turnoverPct + "%") : "N/A";
+
+    var row = [
+      '"' + (displayName || '').replace(/"/g, '""') + '"',
+      candidatesVal,
+      hiresVal,
+      '"' + (dropOffVal + '').replace(/"/g, '""') + '"',
+      '"' + (engagementVal + '').replace(/"/g, '""') + '"',
+      '"' + (turnoverVal + '').replace(/"/g, '""') + '"'
+    ];
+    csvRows.push(row.join(","));
+  }
+
+  // Join all rows into a single CSV string and create a downloadable Blob.
+  var csvString = csvRows.join("\n");
+  var blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
+  var link = document.createElement("a");
+  var today = new Date().toISOString().split('T')[0];
+
+  // Trigger the download with a dated filename, then clean up the link element.
+  link.href = URL.createObjectURL(blob);
+  link.setAttribute("download", "source_effectiveness_report_" + today + ".csv");
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
