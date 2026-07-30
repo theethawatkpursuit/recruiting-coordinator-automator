@@ -123,6 +123,25 @@ function renderSourceTable() {
     }
   }
 
+  // First pass: find the highest hire count and highest drop-off percentage across
+  // all shared sources so we can automatically highlight only the top source in each.
+  var maxHires = 0;
+  var maxDropOff = -1;
+  for (var i = 0; i < allSourceNames.length; i++) {
+    var hrKey0 = allSourceNames[i];
+    var displayName0 = hrToDisplay[hrKey0] || hrKey0;
+    var pipelineData0 = sourceLookup[displayName0] || sourceLookup[hrKey0] || null;
+    if (pipelineData0) {
+      if (pipelineData0.hires > maxHires) {
+        maxHires = pipelineData0.hires;
+      }
+      var dropPct0 = parseInt(pipelineData0.dropOff, 10);
+      if (dropPct0 > maxDropOff) {
+        maxDropOff = dropPct0;
+      }
+    }
+  }
+
   // Build table rows for each shared source.
   var tableHTML = "";
   for (var i = 0; i < allSourceNames.length; i++) {
@@ -131,19 +150,20 @@ function renderSourceTable() {
     var pipelineData = sourceLookup[displayName] || sourceLookup[hrKey] || null;
 
     // Build the candidates, hires, and drop-off cells from pipeline data.
-    // Highlight high hire rates (>=40%) in green and high drop-offs (>=35%) in red.
+    // Highlight the single highest hire count in green and the highest drop-off in red.
     var candidatesCell, hireCell, dropCell;
     if (pipelineData) {
       candidatesCell = "<td>" + pipelineData.candidates + "</td>";
 
-      var rate = (pipelineData.hires / pipelineData.candidates) * 100;
-      if (rate >= 40) {
+      // Only the source with the highest hire count gets the green highlight.
+      if (maxHires > 0 && pipelineData.hires === maxHires) {
         hireCell = '<td style="color:#16A34A;font-weight:600;">' + pipelineData.hires + "</td>";
       } else {
         hireCell = "<td>" + pipelineData.hires + "</td>";
       }
 
-      if (parseInt(pipelineData.dropOff) >= 35) {
+      // Only the source with the highest drop-off percentage gets the red highlight.
+      if (maxDropOff > 0 && parseInt(pipelineData.dropOff, 10) === maxDropOff) {
         dropCell = '<td style="color:#DC2626;font-weight:600;">' + pipelineData.dropOff + "</td>";
       } else {
         dropCell = "<td>" + pipelineData.dropOff + "</td>";

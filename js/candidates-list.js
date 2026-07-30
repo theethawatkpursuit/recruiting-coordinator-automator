@@ -149,8 +149,44 @@ function renderTable(candidates) {
   document.getElementById("candidateList").innerHTML = html;
 }
 
-// Re-render the candidate table using the currently selected filters.
+// Save the currently selected filter values to localStorage so they persist
+// when the user navigates away and comes back to the candidates list.
+function saveFilters() {
+  var state = {};
+  for (var i = 0; i < FILTER_IDS.length; i++) {
+    state[FILTER_IDS[i]] = getFilterValue(FILTER_IDS[i]);
+  }
+  localStorage.setItem("recruitflowCandidateFilters", JSON.stringify(state));
+}
+
+// Restore previously saved filter values from localStorage after the dropdowns
+// have been populated. Silently ignores values that no longer exist as options.
+function restoreFilters() {
+  var saved = localStorage.getItem("recruitflowCandidateFilters");
+  if (saved === null) return;
+  try {
+    var state = JSON.parse(saved);
+    for (var i = 0; i < FILTER_IDS.length; i++) {
+      var id = FILTER_IDS[i];
+      var sel = document.getElementById(id);
+      if (sel && state[id]) {
+        // Only set the value if it exists as an option in the dropdown.
+        for (var j = 0; j < sel.options.length; j++) {
+          if (sel.options[j].value === state[id]) {
+            sel.value = state[id];
+            break;
+          }
+        }
+      }
+    }
+  } catch (e) {
+    // Ignore malformed saved state.
+  }
+}
+
+// Re-render the candidate table using the currently selected filters and persist them.
 function applyFilters() {
+  saveFilters();
   renderTable(getFilteredCandidates());
 }
 
@@ -163,8 +199,9 @@ function clearFilters() {
   applyFilters();
 }
 
-// Initialize the page: populate dropdowns, render the full list, and wire up events.
+// Initialize the page: populate dropdowns, restore saved filters, render the list, and wire up events.
 populateFilters();
+restoreFilters();
 applyFilters();
 
 // Re-render whenever any filter dropdown changes.
