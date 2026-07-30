@@ -1,9 +1,15 @@
 // js/calendar.js
+// Initializes a FullCalendar instance on the Calendar page, displaying scheduled
+// candidate interviews as events. Clicking an event navigates to the candidate profile.
+// CANDIDATES is defined in js/data.js.
 
+// Wait for the DOM to be fully loaded before initializing the calendar.
+// #calendar is defined in calendar.html.
 document.addEventListener('DOMContentLoaded', function() {
   var calendarEl = document.getElementById('calendar');
 
-  // Convert CANDIDATES array into FullCalendar event objects
+  // Convert CANDIDATES array into FullCalendar event objects.
+  // Only include candidates with a real interview date (skip placeholders).
   var scheduledEvents = CANDIDATES
     .filter(function(c) { 
       // Filter out empty dates or legacy text placeholders
@@ -20,6 +26,7 @@ document.addEventListener('DOMContentLoaded', function() {
       };
     });
 
+  // Create the FullCalendar instance with month/week/day views and custom toolbar.
   var calendar = new FullCalendar.Calendar(calendarEl, {
     initialView: 'dayGridMonth',
   
@@ -29,6 +36,7 @@ document.addEventListener('DOMContentLoaded', function() {
       next: '›',
       today: 'Today'
     },
+    // Toolbar layout: navigation on left, title in center, view switcher on right.
     headerToolbar: {
       left: 'prev,next today',
       center: 'title',
@@ -40,5 +48,6 @@ document.addEventListener('DOMContentLoaded', function() {
     height: 'auto'
   });
 
+  // Render the calendar into the #calendar div.
   calendar.render();
 });

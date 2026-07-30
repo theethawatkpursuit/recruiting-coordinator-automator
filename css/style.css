@@ -1,4 +1,6 @@
 /* ---------- Base & Font Uniformity ---------- */
+/* Global reset: zero out margins/padding, use border-box sizing, and set a
+   consistent font stack for all elements, pseudo-elements, and the body. */
 *,
 *::before,
 *::after {
@@ -8,6 +10,7 @@
   font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
+/* Body defaults: light gray background, dark text, and 1.5 line height. */
 body {
   font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   background: #F7F8FA;
@@ -23,14 +26,16 @@ textarea {
   font-family: inherit;
 }
 
-/* FullCalendar Component Font Override */
+/* FullCalendar Component Font Override: ensure calendar text uses the same font */
 .fc, .fc * {
   font-family: inherit !important;
 }
 
+/* Links: remove underline and inherit text color by default */
 a { text-decoration: none; color: inherit; }
 
 /* ---------- Login ---------- */
+/* Login page layout: centered card on a blue gradient background. */
 .login-body {
   display: flex;
   align-items: center;
@@ -67,6 +72,7 @@ a { text-decoration: none; color: inherit; }
 .login-card input:focus { outline: 2px solid #2563EB; border-color: #2563EB; }
 
 /* ---------- Buttons ---------- */
+/* Primary action button: blue background, white text, full width by default. */
 .btn-primary {
   background: #2563EB;
   color: #fff;
@@ -80,6 +86,7 @@ a { text-decoration: none; color: inherit; }
 }
 .btn-primary:hover { background: #1D4ED8; }
 
+/* Secondary button: white background with blue border, used for less prominent actions. */
 .btn-secondary {
   background: #fff;
   color: #2563EB;
@@ -92,6 +99,7 @@ a { text-decoration: none; color: inherit; }
 }
 .btn-secondary:hover { background: #EFF6FF; }
 
+/* Small button variant: reduced font size and padding, auto width for inline use. */
 .btn-small {
   font-size: 12px;
   padding: 6px 10px;
@@ -99,6 +107,7 @@ a { text-decoration: none; color: inherit; }
   margin-right: 6px;
 }
 
+/* Danger button: red background, used for destructive actions like delete. */
 .btn-danger {
   background: #DC2626;
   color: white;
@@ -114,6 +123,8 @@ a { text-decoration: none; color: inherit; }
 }
 
 /* ---------- Sidebar Layout ---------- */
+/* Fixed left sidebar: dark background, 220px wide, full viewport height,
+   flex column layout with nav links and a footer at the bottom. */
 .sidebar {
   position: fixed;
   top: 0; left: 0;
@@ -125,11 +136,13 @@ a { text-decoration: none; color: inherit; }
   display: flex;
   flex-direction: column;
 }
+/* Sidebar logo/brand text at the top. */
 .logo-small {
   color: #fff;
   font-size: 20px;
   margin-bottom: 30px;
 }
+/* Sidebar navigation links: block layout, rounded corners, hover and active states. */
 .sidebar a {
   display: block;
   padding: 10px 12px;
@@ -142,6 +155,7 @@ a { text-decoration: none; color: inherit; }
 .sidebar a:hover { background: #374151; color: #fff; }
 .sidebar a.active { background: #2563EB; color: #fff; }
 
+/* Sidebar footer: pushed to the bottom with a top border, contains user name and logout. */
 .sidebar-footer {
   margin-top: auto;
   border-top: 1px solid #374151;
@@ -156,14 +170,17 @@ a { text-decoration: none; color: inherit; }
 .sidebar-footer .logout:hover { color: #fff; background: none; }
 
 /* ---------- Content ---------- */
+/* Main content area: offset by the sidebar width, with consistent padding. */
 .content {
   margin-left: 220px;
   padding: 32px 40px;
 }
+/* Page header: title and subtitle styling at the top of each page. */
 .page-header { margin-bottom: 24px; }
 .page-header h1 { font-size: 26px; }
 .page-header p { color: #6B7280; }
 
+/* Back navigation link styling. */
 .back-link {
   color: #2563EB;
   font-size: 14px;
@@ -172,6 +189,8 @@ a { text-decoration: none; color: inherit; }
 }
 
 /* ---------- Stat Cards ---------- */
+/* Responsive grid of stat cards; each card shows a big number and a label.
+   Warning cards show red numbers, success cards show green numbers. */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
@@ -190,6 +209,7 @@ a { text-decoration: none; color: inherit; }
 .stat-card.success .num { color: #16A34A; }
 
 /* ---------- Panels ---------- */
+/* White card panels with border and rounded corners, used to group content sections. */
 .panel {
   background: #fff;
   border: 1px solid #E5E7EB;
@@ -200,6 +220,7 @@ a { text-decoration: none; color: inherit; }
 .panel h2 { font-size: 18px; margin-bottom: 6px; }
 .panel-sub { color: #6B7280; font-size: 13px; margin-bottom: 16px; }
 
+/* Two-column grid layout for side-by-side panels. */
 .two-col {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -207,6 +228,7 @@ a { text-decoration: none; color: inherit; }
 }
 
 /* ---------- Tables ---------- */
+/* Data table styling: full width, collapsed borders, gray header text, no bottom border on last row. */
 .data-table {
   width: 100%;
   border-collapse: collapse;
@@ -221,6 +243,7 @@ a { text-decoration: none; color: inherit; }
 .data-table tr:last-child td { border-bottom: none; }
 
 /* ---------- Badges ---------- */
+/* Pill-shaped status badges with color variants for risk, wait, action, and ok states. */
 .badge {
   display: inline-block;
   padding: 3px 10px;
@@ -234,6 +257,7 @@ a { text-decoration: none; color: inherit; }
 .badge-ok { background: #DCFCE7; color: #15803D; }
 
 /* ---------- Stage List ---------- */
+/* Stage list: flex rows with stage name on the left and count on the right. */
 .stage-list, .task-list { list-style: none; }
 .stage-list li {
   display: flex;
@@ -246,6 +270,8 @@ a { text-decoration: none; color: inherit; }
 .stage-list .count { font-weight: 700; }
 
 /* ---------- Task List ---------- */
+/* Task list items: flex layout with a colored dot indicator and task text.
+   Overdue tasks get a red dot; normal tasks get a blue dot. */
 .task-list li {
   display: flex;
   align-items: center;
@@ -263,6 +289,7 @@ a { text-decoration: none; color: inherit; }
 .danger-text { color: #DC2626; }
 
 /* ---------- Filters ---------- */
+/* Filter bar: flex row of dropdown selects with consistent padding and borders. */
 .filters {
   display: flex;
   gap: 12px;
@@ -277,6 +304,8 @@ a { text-decoration: none; color: inherit; }
 }
 
 /* ---------- Kanban ---------- */
+/* Kanban board: 5-column grid (one per stage) with horizontal scroll on overflow.
+   Each column has a gray background; cards are white with hover shadow. */
 .kanban {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -309,6 +338,7 @@ a { text-decoration: none; color: inherit; }
 .kanban-card .role { color: #6B7280; font-size: 12px; margin: 2px 0 6px; }
 
 /* ---------- Candidate Detail ---------- */
+/* Candidate detail page layout: header, detail grid, notes box, and alert banner. */
 .detail-header {
   display: flex;
   justify-content: space-between;
@@ -342,15 +372,19 @@ a { text-decoration: none; color: inherit; }
 }
 
 /* ---------- Report actions ---------- */
+/* Report action button row (e.g. Export Report). */
 .report-actions { margin-top: 20px; display: flex; gap: 12px; }
 
 /* ---------- Responsive ---------- */
+/* On screens narrower than 900px, collapse two-column layouts to one column
+   and reduce the Kanban board to two columns. */
 @media (max-width: 900px) {
   .two-col { grid-template-columns: 1fr; }
   .kanban { grid-template-columns: repeat(2, 1fr); }
 }
 
 /* ---------- Import Page ---------- */
+/* Import page styling: instruction steps, file input, and success/error messages. */
 .import-steps { line-height: 1.9; color: #374151; margin-bottom: 16px; }
 .import-steps code {
   background: #F3F4F6; padding: 2px 6px; border-radius: 4px;
@@ -365,6 +399,8 @@ a { text-decoration: none; color: inherit; }
 .import-message.error { color: #DC2626; }
 
 /* ---------- Scrollable Candidate List ---------- */
+/* Candidate list container: white card with border; scrolling is handled by
+   the inner table wrapper, not this outer container. */
 .candidate-list-box {
   background: #fff;
   border: 1px solid #E5E7EB;
@@ -375,6 +411,7 @@ a { text-decoration: none; color: inherit; }
   overflow: visible;
 }
 
+/* Individual candidate row: flex layout with hover highlight, used in the list view. */
 .candidate-row {
   display: flex;
   align-items: center;
@@ -416,10 +453,12 @@ a { text-decoration: none; color: inherit; }
 }
 
 /* ---------- Candidate Detail Page ---------- */
+/* Candidate profile page: max-width container, header, detail grid, notes, and actions. */
 .candidate-profile {
   max-width: 900px;
 }
 
+/* Profile header: flex layout with name/role on the left and actions on the right. */
 .profile-header {
   display: flex;
   justify-content: space-between;
@@ -478,6 +517,7 @@ a { text-decoration: none; color: inherit; }
   line-height: 1.6;
 }
 
+/* Candidate action buttons row: back link on the left, delete on the right. */
 .candidate-actions {
   display: flex;
   justify-content: space-between;
@@ -486,6 +526,8 @@ a { text-decoration: none; color: inherit; }
 }
 
 /* ---------- FullCalendar Navigation & Button Fixes ---------- */
+/* Custom styling for FullCalendar toolbar title, buttons, and icons to match
+   the app's design system (blue primary buttons, consistent sizing). */
 .fc .fc-toolbar-title {
   font-size: 1.25rem;
   font-weight: 600;
@@ -549,6 +591,7 @@ a { text-decoration: none; color: inherit; }
 }
 
 /* Source Tags Styling */
+/* Small pill-shaped tag for displaying recruitment source names. */
 .source-tag {
   display: inline-block;
   padding: 2px 8px;

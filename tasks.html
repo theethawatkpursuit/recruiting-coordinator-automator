@@ -1,5 +1,7 @@
+<!-- HTML5 document declaration and language set to English -->
 <!DOCTYPE html>
 <html lang="en">
+<!-- Head section: metadata, viewport for responsive design, title, and stylesheet link -->
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,30 +9,37 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+  <!-- Sidebar Navigation: empty container populated by buildSidebar() in js/sidebar.js -->
   <nav class="sidebar"></nav>
 
+  <!-- Main content area for the tasks page -->
   <main class="content">
+    <!-- Page header with title and description -->
     <header class="page-header">
-      <h1>Tasks &amp; Reminders</h1>
+      <h1>Tasks & Reminders</h1>
       <p>Actions needed so no candidate slips through the cracks</p>
     </header>
 
+    <!-- Overdue tasks panel: list populated by renderTasksPage() in js/tasks.js -->
     <section class="panel">
       <h2 class="danger-text">Overdue</h2>
       <ul class="task-list" id="overdueTasks"></ul>
     </section>
 
+    <!-- Due today tasks panel: list populated by renderTasksPage() in js/tasks.js -->
     <section class="panel">
       <h2>Due Today</h2>
       <ul class="task-list" id="todayTasks"></ul>
     </section>
 
+    <!-- Upcoming tasks panel: list populated by renderTasksPage() in js/tasks.js -->
     <section class="panel">
       <h2>Upcoming</h2>
       <ul class="task-list" id="upcomingTasks"></ul>
     </section>
   </main>
 
+  <!-- Scripts: load shared data, tasks logic, set active page, then build sidebar -->
   <script src="js/data.js"></script>
   <script src="js/tasks.js"></script>
   <script>var ACTIVE_PAGE = "tasks.html";</script>

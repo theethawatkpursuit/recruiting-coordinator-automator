@@ -1,7 +1,15 @@
 // ---------- Report Stat Cards ----------
+// Calculate summary metrics for the report page: active candidates, hires, and at-risk count.
+// CANDIDATES, isActiveCandidate, isHired, isAtRisk, getOpenRolesCount, normalizeSource,
+// isHired, isFirstRoundDropout, and effectiveStatus are defined in js/data.js.
+// HR_SOURCE_STATS and hrDataPromise are defined in js/hr-data.js.
 
+// Count candidates still in the pipeline (not hired or rejected).
+// isActiveCandidate is defined in js/data.js.
 var totalCandidates = CANDIDATES.filter(function(c) { return isActiveCandidate(c); }).length;
 
+// Count total hired candidates by looping through the array.
+// isHired is defined in js/data.js.
 var totalHires = 0;
 for (var i = 0; i < CANDIDATES.length; i++) {
   if (isHired(CANDIDATES[i])) {
@@ -9,6 +17,8 @@ for (var i = 0; i < CANDIDATES.length; i++) {
   }
 }
 
+// Count at-risk candidates (active with stale contact).
+// isAtRisk is defined in js/data.js.
 var riskCount = 0;
 for (var i = 0; i < CANDIDATES.length; i++) {
   if (isAtRisk(CANDIDATES[i])) {
@@ -16,6 +26,8 @@ for (var i = 0; i < CANDIDATES.length; i++) {
   }
 }
 
+// Define the five report stat cards with their values and CSS classes.
+// getOpenRolesCount is defined in js/data.js.
 var reportStats = [
   { num: getOpenRolesCount(), label: "Open Roles", cls: "" },
   { num: totalCandidates, label: "Candidates in Process", cls: "" },
@@ -24,6 +36,8 @@ var reportStats = [
   { num: totalHires, label: "Total Hires", cls: "success" }
 ];
 
+// Build the stat card HTML and inject it into the #reportStats container.
+// #reportStats is defined in reports.html.
 var statsHTML = "";
 for (var i = 0; i < reportStats.length; i++) {
   var s = reportStats[i];
@@ -37,19 +51,25 @@ document.getElementById("reportStats").innerHTML = statsHTML;
 
 
 // ---------- Source Effectiveness Table ----------
+// Aggregate pipeline data per recruitment source: candidate count, hires, and
+// first-round drop-offs. Then merge with HR dataset stats (engagement, turnover).
 
 var sourceLookup = {};
 var hrToDisplay = {};
 
+// Loop through all candidates and accumulate per-source metrics.
+// normalizeSource, isHired, and isFirstRoundDropout are defined in js/data.js.
 for (var i = 0; i < CANDIDATES.length; i++) {
   var c = CANDIDATES[i];
   var src = normalizeSource(c.source);
 
+  // Initialize the source entry on first encounter.
   if (!sourceLookup[src]) {
     sourceLookup[src] = { candidates: 0, hires: 0, firstRoundDropouts: 0 };
   }
   sourceLookup[src].candidates++;
 
+  // Count hires and first-round dropouts for this source.
   if (isHired(c)) {
     sourceLookup[src].hires++;
   }
@@ -58,6 +78,7 @@ for (var i = 0; i < CANDIDATES.length; i++) {
   }
 }
 
+// Calculate the drop-off percentage for each source.
 for (var key in sourceLookup) {
   var s = sourceLookup[key];
   s.dropOff = s.candidates > 0
@@ -65,9 +86,13 @@ for (var key in sourceLookup) {
     : "0%";
 }
 
+// Track which sources have been added to the table to avoid duplicates.
 var allSourceNames = [];
 var addedKeys = {};
 
+// Wait for the HR dataset promise to resolve before rendering, so engagement
+// and turnover data is available. If no promise exists, render immediately.
+// hrDataPromise and HR_SOURCE_STATS are defined in js/hr-data.js.
 if (window.hrDataPromise) {
   window.hrDataPromise.then(function() {
     renderSourceTable();
@@ -76,6 +101,8 @@ if (window.hrDataPromise) {
   renderSourceTable();
 }
 
+// Render the source effectiveness table: only includes sources present in BOTH
+// the HR dataset and the applicant pipeline. Highlights high/low values with color.
 function renderSourceTable() {
   // Collect the set of sources present in the HR dataset.
   var hrSourceKeys = {};
@@ -96,12 +123,15 @@ function renderSourceTable() {
     }
   }
 
+  // Build table rows for each shared source.
   var tableHTML = "";
   for (var i = 0; i < allSourceNames.length; i++) {
     var hrKey = allSourceNames[i];
     var displayName = hrToDisplay[hrKey] || hrKey;
     var pipelineData = sourceLookup[displayName] || sourceLookup[hrKey] || null;
 
+    // Build the candidates, hires, and drop-off cells from pipeline data.
+    // Highlight high hire rates (>=40%) in green and high drop-offs (>=35%) in red.
     var candidatesCell, hireCell, dropCell;
     if (pipelineData) {
       candidatesCell = "<td>" + pipelineData.candidates + "</td>";
@@ -119,11 +149,14 @@ function renderSourceTable() {
         dropCell = "<td>" + pipelineData.dropOff + "</td>";
       }
     } else {
+      // No pipeline data for this source; show em dashes.
       candidatesCell = "<td>—</td>";
       hireCell = "<td>—</td>";
       dropCell = "<td>—</td>";
     }
 
+    // Build the engagement and turnover cells from HR dataset stats.
+    // Highlight low engagement (<4.0) and high turnover (>=30%) in red.
     var engagementCell = "<td>N/A</td>";
     var turnoverCell = "<td>N/A</td>";
     var stats = (typeof HR_SOURCE_STATS !== "undefined") ? HR_SOURCE_STATS[hrKey] : null;
@@ -145,6 +178,7 @@ function renderSourceTable() {
       }
     }
 
+    // Assemble the row HTML with all six cells.
     tableHTML = tableHTML +
       "<tr>" +
         "<td>" + displayName + "</td>" +
@@ -155,21 +189,28 @@ function renderSourceTable() {
         turnoverCell +
       "</tr>";
   }
+  // #sourceTable is defined in reports.html.
   document.querySelector("#sourceTable tbody").innerHTML = tableHTML;
 }
 
 // ---------- Export Report Function ----------
-
+// Export all candidates to a CSV file and trigger a browser download.
+// Escapes double quotes in fields and wraps text fields in quotes.
 function exportCandidatesCSV() {
+  // Abort if there's no data to export.
   if (!CANDIDATES || CANDIDATES.length === 0) {
     alert("No candidate data available to export.");
     return;
   }
 
+  // Define the CSV column headers.
   var headers = ["ID", "Name", "Role", "Department", "Source", "Stage", "Status", "Last Contact (Days)", "Hiring Manager", "Next Step", "Notes"];
 
+  // Start the CSV with the header row.
   var csvRows = [headers.join(",")];
 
+  // Build a CSV row for each candidate, quoting text fields and escaping inner quotes.
+  // normalizeSource and effectiveStatus are defined in js/data.js.
   for (var i = 0; i < CANDIDATES.length; i++) {
     var c = CANDIDATES[i];
     var row = [
@@ -188,11 +229,13 @@ function exportCandidatesCSV() {
     csvRows.push(row.join(","));
   }
 
+  // Join all rows into a single CSV string and create a downloadable Blob.
   var csvString = csvRows.join("\n");
   var blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
   var link = document.createElement("a");
   var today = new Date().toISOString().split('T')[0];
 
+  // Trigger the download with a dated filename, then clean up the link element.
   link.href = URL.createObjectURL(blob);
   link.setAttribute("download", "candidate_report_" + today + ".csv");
   document.body.appendChild(link);

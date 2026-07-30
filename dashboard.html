@@ -1,5 +1,7 @@
+<!-- HTML5 document declaration and language set to English -->
 <!DOCTYPE html>
 <html lang="en">
+<!-- Head section: metadata, viewport for responsive design, title, and stylesheet link -->
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,19 +9,21 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <!-- Sidebar Navigation -->
+  <!-- Sidebar Navigation: empty container populated by buildSidebar() in js/sidebar.js -->
   <nav class="sidebar"></nav>
 
+  <!-- Main content area for the dashboard page -->
   <main class="content">
+    <!-- Page header with title and description -->
     <header class="page-header">
       <h1>Dashboard</h1>
       <p>Overview of your recruiting pipeline</p>
     </header>
 
-    <!-- Stat Cards -->
+    <!-- Stat Cards: summary metrics filled in by js/dashboard.js (statsGrid) -->
     <section class="stats-grid" id="statsGrid"></section>
 
-    <!-- Priority Alerts -->
+    <!-- Priority Alerts: table of candidates needing attention, populated by js/dashboard.js (alertsTable) -->
     <section class="panel">
       <h2>Priority Alerts</h2>
       <p class="panel-sub">Candidates with no contact in 10+ days or needing action</p>
@@ -36,14 +40,15 @@
       </table>
     </section>
 
+    <!-- Two-column layout for pipeline overview and task preview -->
     <div class="two-col">
-      <!-- Pipeline Overview -->
+      <!-- Pipeline Overview: candidate counts per hiring stage, filled by js/dashboard.js (stageList) -->
       <section class="panel">
         <h2>Pipeline Overview</h2>
         <ul class="stage-list" id="stageList"></ul>
       </section>
 
-      <!-- Upcoming Tasks -->
+      <!-- Upcoming Tasks: preview of overdue/due/upcoming tasks, filled by js/dashboard.js (taskPreview) -->
       <section class="panel">
         <h2>Upcoming Tasks</h2>
         <ul class="task-list" id="taskPreview"></ul>
@@ -51,6 +56,7 @@
     </div>
   </main>
 
+  <!-- Scripts: load shared data, dashboard logic, set active page, then build sidebar -->
   <script src="js/data.js"></script>
   <script src="js/dashboard.js"></script>
   <script>var ACTIVE_PAGE = "dashboard.html";</script>

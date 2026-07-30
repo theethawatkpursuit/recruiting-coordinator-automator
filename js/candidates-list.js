@@ -1,5 +1,9 @@
-// Render candidates in a clean, perfectly aligned table layout
+// Render candidates in a clean, perfectly aligned table layout.
+// Builds an HTML table string with a sticky header and one clickable row per candidate,
+// then injects it into the #candidateList container on the All Candidates page.
+// CANDIDATES, statusBadge, effectiveStatus, and normalizeSource are defined in js/data.js.
 
+// Start building the table HTML: a scrollable wrapper, the table element, and a sticky header row.
 var tableHTML = 
   '<div style="max-height: calc(100vh - 220px); overflow-y: auto;">' +
   '<table class="data-table" style="width: 100%; border-collapse: collapse;">' +
@@ -13,8 +17,12 @@ var tableHTML =
     '</thead>' +
     '<tbody>';
 
+// Loop through every candidate and build a clickable row that navigates to their profile.
+// CANDIDATES is the global candidate array defined in js/data.js.
 for (var i = 0; i < CANDIDATES.length; i++) {
   var c = CANDIDATES[i];
+  // Get the badge text and CSS class for this candidate's effective status.
+  // statusBadge and effectiveStatus are defined in js/data.js.
   var b = statusBadge(effectiveStatus(c));
 
   tableHTML +=
@@ -23,6 +31,7 @@ for (var i = 0; i < CANDIDATES.length; i++) {
         '<div style="font-weight: 600;">' + c.name + '</div>' +
         '<div style="font-size: 13px; color: #6B7280;">' + c.role + ' - ' + c.dept + '</div>' +
       '</td>' +
+      // normalizeSource is defined in js/data.js.
       '<td style="padding: 12px 16px;"><span class="source-tag">' + normalizeSource(c.source) + '</span></td>' +
       '<td style="padding: 12px 16px;">' + c.stage + '</td>' +
       '<td style="padding: 12px 16px; text-align: right;">' +
@@ -31,6 +40,8 @@ for (var i = 0; i < CANDIDATES.length; i++) {
     '</tr>';
 }
 
+// Close the table and wrapper, then inject the finished HTML into the page.
+// #candidateList is defined in candidates-list.html.
 tableHTML += '</tbody></table></div>';
 
 document.getElementById("candidateList").innerHTML = tableHTML;

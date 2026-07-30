@@ -1,5 +1,7 @@
+<!-- HTML5 document declaration and language set to English -->
 <!DOCTYPE html>
 <html lang="en">
+<!-- Head section: metadata, viewport for responsive design, title, and stylesheet link -->
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,24 +9,24 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <!-- Sidebar is filled by js/sidebar.js -->
+  <!-- Sidebar Navigation: empty container populated by buildSidebar() in js/sidebar.js -->
   <nav class="sidebar"></nav>
 
+  <!-- Main content area for the all candidates page -->
   <main class="content">
+    <!-- Page header with title and description -->
     <header class="page-header">
       <h1>All Candidates</h1>
       <p>Click any candidate to see their full profile</p>
     </header>
 
-    <!-- JavaScript fills this with clickable candidate rows -->
+    <!-- Candidate list container: filled with clickable rows by the top-level script in js/candidates-list.js -->
     <div class="candidate-list-box" id="candidateList"></div>
   </main>
 
-  <!-- Data must load before candidates-list.js -->
+  <!-- Scripts: shared data must load before the list logic, then set active page and build sidebar -->
   <script src="js/data.js"></script>
   <script src="js/candidates-list.js"></script>
-
-  <!-- Sidebar setup -->
   <script>var ACTIVE_PAGE = "candidates-list.html";</script>
   <script src="js/sidebar.js"></script>
 </body>

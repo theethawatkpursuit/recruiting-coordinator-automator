@@ -1,5 +1,7 @@
+<!-- HTML5 document declaration and language set to English -->
 <!DOCTYPE html>
 <html lang="en">
+<!-- Head section: metadata, viewport for responsive design, title, and stylesheet link -->
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,25 +9,30 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+  <!-- Sidebar Navigation: empty container populated by buildSidebar() in js/sidebar.js -->
   <nav class="sidebar"></nav>
 
+  <!-- Main content area for the pipeline page -->
   <main class="content">
+    <!-- Page header with title and description -->
     <header class="page-header">
       <h1>Candidate Pipeline</h1>
       <p>Candidates organized by hiring stage</p>
     </header>
 
-    <!-- Filters -->
+    <!-- Filters: dropdowns for role, department, and source; options added by fillFilter() and
+         change events handled by renderBoard() in js/pipeline.js -->
     <section class="filters">
       <select id="filterRole"><option value="">All Roles</option></select>
       <select id="filterDept"><option value="">All Departments</option></select>
       <select id="filterSource"><option value="">All Sources</option></select>
     </section>
 
-    <!-- Kanban Board -->
+    <!-- Kanban Board: columns per hiring stage, rendered by renderBoard() in js/pipeline.js -->
     <section class="kanban" id="kanban"></section>
   </main>
 
+  <!-- Scripts: load shared data, pipeline logic, set active page, then build sidebar -->
   <script src="js/data.js"></script>
   <script src="js/pipeline.js"></script>
   <script>var ACTIVE_PAGE = "pipeline.html";</script>

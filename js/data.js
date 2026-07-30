@@ -1,5 +1,10 @@
 // Shared candidate data used across all pages.
+// Bump this version when the default dataset changes so localStorage refreshes.
 const DATA_VERSION = 2;
+
+// Master list of all candidates. Each object represents one person in the pipeline.
+// Fields: id, name, role, dept, source, stage, lastContact (days ago), manager,
+// nextStep, status (risk/wait/action/ok), interviewDate, notes.
 var CANDIDATES = [
   {
     id: 1, name: "Maya Chen", role: "UX Designer", dept: "Product",
@@ -270,12 +275,16 @@ var CANDIDATES = [
 
 ];
 
+// Hiring stage definitions: active pipeline stages and terminal (ended) stages.
 const STAGES = ["New Applicant", "Screen", "Interview", "Final Round", "Offer"];
 const TERMINAL_STAGES = ["Hired", "Rejected"];
 const ALL_STAGES = STAGES.concat(TERMINAL_STAGES);
+// A candidate with no contact for this many days is considered "going cold" / at risk.
 const COLD_CONTACT_DAYS = 10;
+// Stages that count as "first round" — used to identify early drop-offs.
 const FIRST_ROUND_STAGES = ["New Applicant", "Screen", "Interview"];
 
+// Map raw source names to the display labels used throughout the app.
 const SOURCE_ALIASES = {
   "Referral": "Employee Referral",
   "Employee Referral": "Employee Referral",
@@ -289,32 +298,39 @@ const SOURCE_ALIASES = {
   "Diversity Job Fair": "Diversity Job Fair"
 };
 
+// Return the normalized (display) name for a recruitment source.
 function normalizeSource(source) {
   return SOURCE_ALIASES[source] || source;
 }
 
+// A candidate is "active" if they are not in a terminal stage (Hired/Rejected).
 function isActiveCandidate(c) {
   return TERMINAL_STAGES.indexOf(c.stage) === -1;
 }
 
+// A candidate is "at risk" if they are active and haven't been contacted in COLD_CONTACT_DAYS or more.
 function isAtRisk(c) {
   return isActiveCandidate(c) && c.lastContact >= COLD_CONTACT_DAYS;
 }
 
+// Return the effective status, overriding with "risk" if the candidate is going cold.
 function effectiveStatus(c) {
   if (isAtRisk(c)) return "risk";
   return c.status || "ok";
 }
 
+// Check whether a candidate has been hired.
 function isHired(c) {
   return c.stage === "Hired";
 }
 
+// Check whether a rejected candidate dropped out during a first-round stage.
 function isFirstRoundDropout(c) {
   if (c.stage !== "Rejected") return false;
   return FIRST_ROUND_STAGES.indexOf(c.rejectedAtStage) !== -1;
 }
 
+// Count the number of distinct open roles (roles with at least one active candidate).
 function getOpenRolesCount() {
   var roles = {};
   CANDIDATES.forEach(function(c) {
@@ -323,6 +339,7 @@ function getOpenRolesCount() {
   return Object.keys(roles).length;
 }
 
+// Map a status string to the badge text and CSS class used in the UI.
 function statusBadge(status) {
   switch (status) {
     case "risk":   return { text: "At Risk",          cls: "badge-risk" };
@@ -332,11 +349,13 @@ function statusBadge(status) {
   }
 }
 
+// Persist the current CANDIDATES array and data version to localStorage.
 function saveCandidates() {
   localStorage.setItem("recruitflowCandidates", JSON.stringify(CANDIDATES));
   localStorage.setItem("recruitflowDataVersion", String(DATA_VERSION));
 }
 
+// Load saved candidates from localStorage if the version matches; otherwise save defaults.
 function loadSavedCandidates() {
   var saved = localStorage.getItem("recruitflowCandidates");
   var savedVersion = localStorage.getItem("recruitflowDataVersion");
@@ -347,7 +366,8 @@ function loadSavedCandidates() {
   }
 }
 
-// Generate real-time task items based on candidate statuses & contact dates
+// Generate real-time task items based on candidate statuses & contact dates.
+// Returns three arrays: overdue (at-risk), today (needs action/waiting), and upcoming (everything else).
 function getDynamicTasks() {
   const overdue = [];
   const today = [];
@@ -366,9 +386,11 @@ function getDynamicTasks() {
   return { overdue, today, upcoming };
 }
 
+// On script load, restore saved candidates from localStorage (or initialize defaults).
 loadSavedCandidates();
 
-// Parse a single line of CSV taking quotes into account (shared utility)
+// Parse a single line of CSV taking quotes into account (shared utility).
+// Handles quoted fields and escaped double-quotes ("") inside quoted values.
 function parseCSVLine(text) {
   var ret = [];
   var inQuote = false;

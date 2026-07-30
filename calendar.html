@@ -1,30 +1,36 @@
+<!-- HTML5 document declaration and language set to English -->
 <!DOCTYPE html>
 <html lang="en">
+<!-- Head section: metadata, viewport, title, stylesheet, and FullCalendar library from CDN -->
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RecruitFlow — Interview Calendar</title>
   <link rel="stylesheet" href="css/style.css">
   
-  <!-- FullCalendar v6 CDN -->
+  <!-- Load FullCalendar v6 library from a CDN so the calendar UI is available -->
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
 </head>
 <body>
-  <!-- Sidebar Navigation -->
+  <!-- Sidebar Navigation: empty container populated by buildSidebar() in js/sidebar.js -->
   <nav class="sidebar"></nav>
 
+  <!-- Main content area for the calendar page -->
   <main class="content">
+    <!-- Page header with title and description -->
     <header class="page-header">
       <h1>Interview Calendar</h1>
       <p>Schedule, view, and manage upcoming candidate interviews</p>
     </header>
 
+    <!-- Panel wrapping the calendar; FullCalendar renders inside the inner div via
+         the DOMContentLoaded handler in js/calendar.js -->
     <section class="panel">
-      <!-- FullCalendar renders inside this div -->
       <div id="calendar"></div>
     </section>
   </main>
 
+  <!-- Scripts: load shared data, calendar logic, set active page, then build sidebar -->
   <script src="js/data.js"></script>
   <script src="js/calendar.js"></script>
   <script>var ACTIVE_PAGE = "calendar.html";</script>

@@ -1,20 +1,28 @@
 // js/candidate.js
+// Logic for the single candidate profile page: view details, edit, schedule/cancel
+// interviews, and delete the candidate. The candidate is identified by the ?id= URL param.
+// CANDIDATES, ALL_STAGES, FIRST_ROUND_STAGES, COLD_CONTACT_DAYS, statusBadge,
+// effectiveStatus, normalizeSource, isAtRisk, isActiveCandidate, and saveCandidates
+// are defined in js/data.js.
 
 // Get the candidate id from the URL (e.g. candidate.html?id=3)
 var params = new URLSearchParams(window.location.search);
 var candidateId = Number(params.get("id"));
 
+// Will hold the candidate object once found; isEditing tracks view vs. edit mode.
 var selectedCandidate = null;
 var isEditing = false; // Tracks whether edit mode is active
 
-// Find the candidate with this id
+// Find the candidate with this id in the global CANDIDATES array.
+// CANDIDATES is defined in js/data.js.
 for (var i = 0; i < CANDIDATES.length; i++) {
   if (CANDIDATES[i].id === candidateId) {
     selectedCandidate = CANDIDATES[i];
   }
 }
 
-// If no matching candidate is found, show an error
+// If no matching candidate is found, show an error panel with a back link.
+// #candidateDetail is defined in candidate.html.
 if (selectedCandidate === null) {
   document.getElementById("candidateDetail").innerHTML =
     '<section class="panel">' +
@@ -27,7 +35,7 @@ if (selectedCandidate === null) {
 }
 
 
-// Decide whether to render view mode or edit mode
+// Decide whether to render view mode or edit mode based on the isEditing flag.
 function renderPage() {
   if (isEditing) {
     showEditForm(selectedCandidate);
@@ -37,7 +45,7 @@ function renderPage() {
 }
 
 
-// Convert days ago integer into YYYY-MM-DD string format for edit date input
+// Convert a "days ago" integer into a YYYY-MM-DD string for the edit form's date input.
 function getLastContactDateString(daysAgo) {
   const d = new Date();
   d.setDate(d.getDate() - (daysAgo || 0));
@@ -46,12 +54,16 @@ function getLastContactDateString(daysAgo) {
 
 
 // --- VIEW MODE ---
+// Render the read-only candidate profile: header, detail grid, notes, interview
+// scheduler, and action buttons (back, delete).
 function showCandidateDetail(candidate) {
+  // Determine whether the candidate has a real interview date (not a placeholder).
   var hasDate = candidate.interviewDate && 
                 candidate.interviewDate !== "" && 
                 candidate.interviewDate !== "Not scheduled" && 
                 candidate.interviewDate !== "Pending";
 
+  // Format the interview date for display, or fall back to "Not scheduled".
   var displayDate = "Not scheduled";
   if (hasDate) {
     var d = new Date(candidate.interviewDate);
@@ -69,10 +81,13 @@ function showCandidateDetail(candidate) {
     }
   }
 
+  // Value to pre-fill the datetime-local picker (empty if no date).
   var pickerValue = hasDate ? candidate.interviewDate : "";
 
   var detailHTML = "";
 
+  // Profile header: name, role/dept, status badge, and Edit button.
+  // statusBadge and effectiveStatus are defined in js/data.js.
   detailHTML +=
     '<section class="panel candidate-profile">' +
       '<div class="profile-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">' +
@@ -88,12 +103,14 @@ function showCandidateDetail(candidate) {
         '</div>' +
       '</div>' +
 
+      // Detail grid: stage, source, manager, last contact, interview date, next step.
       '<div class="detail-grid">' +
         '<div class="detail-item">' +
           '<strong>Stage</strong>' +
           '<span>' + candidate.stage + '</span>' +
         '</div>' +
 
+        // normalizeSource is defined in js/data.js.
         '<div class="detail-item">' +
           '<strong>Source</strong>' +
           '<span><span class="source-tag">' + normalizeSource(candidate.source) + '</span></span>' +
@@ -104,6 +121,7 @@ function showCandidateDetail(candidate) {
           '<span>' + candidate.manager + '</span>' +
         '</div>' +
 
+        // isAtRisk is defined in js/data.js.
         '<div class="detail-item">' +
           '<strong>Last Contact</strong>' +
           '<span>' + candidate.lastContact + ' days ago' +
@@ -122,11 +140,13 @@ function showCandidateDetail(candidate) {
         '</div>' +
       '</div>' +
 
+      // Notes section.
       '<div class="notes-box" style="margin-top: 20px;">' +
         '<h3>Notes</h3>' +
         '<p>' + (candidate.notes || "No notes added yet.") + '</p>' +
       '</div>' +
 
+      // Schedule Interview section: datetime picker, schedule/reschedule, and cancel buttons.
       '<!-- Schedule Interview Section -->' +
       '<div class="schedule-box" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee;">' +
         '<h3>Schedule Interview</h3>' +
@@ -137,6 +157,7 @@ function showCandidateDetail(candidate) {
             (hasDate ? 'Reschedule Interview' : 'Schedule Interview') +
           '</button>';
 
+  // Only show the Cancel button if an interview is already scheduled.
   if (hasDate) {
     detailHTML += '<button class="btn-secondary" onclick="cancelInterview(' + candidate.id + ')">Cancel Schedule</button>';
   }
@@ -145,43 +166,56 @@ function showCandidateDetail(candidate) {
         '</div>' +
       '</div>' +
 
+      // Action buttons: back to list and delete candidate.
       '<div class="candidate-actions" style="margin-top: 25px;">' +
         '<a href="candidates-list.html" class="btn-secondary">Back to All Candidates</a>' +
         '<button class="btn-danger" onclick="deleteCandidate(' + candidate.id + ')">Delete Candidate</button>' +
       '</div>' +
     '</section>';
 
+  // #candidateDetail is defined in candidate.html.
   document.getElementById("candidateDetail").innerHTML = detailHTML;
 }
 
 
 // --- EDIT MODE FORM ---
+// Render the editable form for the candidate with fields for all properties.
+// Includes conditional fields: "Dropped Off After" shows only for Rejected stage,
+// and "Status Alert" shows for all other non-terminal stages.
 function showEditForm(candidate) {
+  // Build the stage dropdown options, marking the current stage as selected.
+  // ALL_STAGES is defined in js/data.js.
   var stageOptions = "";
   for (var s = 0; s < ALL_STAGES.length; s++) {
     var selected = ALL_STAGES[s] === candidate.stage ? " selected" : "";
     stageOptions += '<option value="' + ALL_STAGES[s] + '"' + selected + '>' + ALL_STAGES[s] + '</option>';
   }
 
+  // Build the rejected-at-stage dropdown options (first-round stages only).
+  // FIRST_ROUND_STAGES is defined in js/data.js.
   var rejectedStageOptions = "";
   for (var r = 0; r < FIRST_ROUND_STAGES.length; r++) {
     var rejSelected = candidate.rejectedAtStage === FIRST_ROUND_STAGES[r] ? " selected" : "";
     rejectedStageOptions += '<option value="' + FIRST_ROUND_STAGES[r] + '"' + rejSelected + '>' + FIRST_ROUND_STAGES[r] + '</option>';
   }
 
+  // The rejected-at-stage field is only visible when the stage is "Rejected".
   var showRejectedAt = candidate.stage === "Rejected";
 
+  // Build the status alert dropdown options.
   var statusOptions =
     '<option value="ok"' + (candidate.status === "ok" ? " selected" : "") + '>On Track</option>' +
     '<option value="action"' + (candidate.status === "action" ? " selected" : "") + '>Needs Action</option>' +
     '<option value="wait"' + (candidate.status === "wait" ? " selected" : "") + '>Waiting Feedback</option>' +
     '<option value="risk"' + (candidate.status === "risk" ? " selected" : "") + '>At Risk</option>';
 
+  // Build the full edit form HTML with a two-column grid layout.
   var editHTML =
     '<section class="panel candidate-profile">' +
       '<h2>Edit Candidate Details</h2>' +
       '<form onsubmit="saveCandidateEdits(event)" style="display: flex; flex-direction: column; gap: 15px; margin-top: 15px;">' +
         
+        // Row 1: Full Name and Role.
         '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">' +
           '<div>' +
             '<label><strong>Full Name</strong></label>' +
@@ -193,6 +227,7 @@ function showEditForm(candidate) {
           '</div>' +
         '</div>' +
 
+        // Row 2: Department and Source.
         '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">' +
           '<div>' +
             '<label><strong>Department</strong></label>' +
@@ -204,6 +239,7 @@ function showEditForm(candidate) {
           '</div>' +
         '</div>' +
 
+        // Row 3: Stage, conditional Rejected-At-Stage or Status Alert.
         '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">' +
           '<div>' +
             '<label><strong>Stage</strong></label>' +
@@ -219,6 +255,7 @@ function showEditForm(candidate) {
           '</div>' +
         '</div>' +
 
+        // Row 4: Hiring Manager and Last Contact Date.
         '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">' +
           '<div>' +
             '<label><strong>Hiring Manager</strong></label>' +
@@ -230,16 +267,19 @@ function showEditForm(candidate) {
           '</div>' +
         '</div>' +
 
+        // Next Step field (full width).
         '<div>' +
           '<label><strong>Next Step</strong></label>' +
           '<input type="text" id="editNextStep" value="' + candidate.nextStep + '" style="width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px;">' +
         '</div>' +
 
+        // Notes textarea (full width).
         '<div>' +
           '<label><strong>Notes</strong></label>' +
           '<textarea id="editNotes" rows="4" style="width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px;">' + candidate.notes + '</textarea>' +
         '</div>' +
 
+        // Form action buttons: Save and Cancel.
         '<div style="display: flex; gap: 10px; margin-top: 10px;">' +
           '<button type="submit" class="btn-primary">Save Changes</button>' +
           '<button type="button" class="btn-secondary" onclick="toggleEditMode(false)">Cancel</button>' +
@@ -248,11 +288,15 @@ function showEditForm(candidate) {
       '</form>' +
     '</section>';
 
+  // #candidateDetail is defined in candidate.html.
   document.getElementById("candidateDetail").innerHTML = editHTML;
 }
 
 
-// Show/hide rejected-at-stage field when stage changes in edit form
+// Show/hide the rejected-at-stage field and status alert field when the stage
+// dropdown changes in the edit form. Rejected shows rejected-at-stage; others show status.
+// #editStage, #rejectedAtStageField, and #statusAlertField are dynamically created
+// by showEditForm() in this file (js/candidate.js).
 function toggleRejectedAtStage() {
   var stage = document.getElementById("editStage").value;
   var rejectedField = document.getElementById("rejectedAtStageField");
@@ -262,23 +306,28 @@ function toggleRejectedAtStage() {
 }
 
 
-// Switch between View Mode and Edit Mode
+// Switch between View Mode and Edit Mode, then re-render the page.
 function toggleEditMode(enable) {
   isEditing = enable;
   renderPage();
 }
 
 
-// Save form updates back to CANDIDATES and localStorage
+// Save form updates back to the CANDIDATES array and localStorage.
+// Reads all form fields, handles stage-specific logic (rejected/hired), and
+// recalculates lastContact days and risk status from the contact date.
+// All #edit* elements are dynamically created by showEditForm() in this file (js/candidate.js).
 function saveCandidateEdits(event) {
   event.preventDefault();
 
+  // Read text fields from the form.
   selectedCandidate.name = document.getElementById("editName").value;
   selectedCandidate.role = document.getElementById("editRole").value;
   selectedCandidate.dept = document.getElementById("editDept").value;
   selectedCandidate.stage = document.getElementById("editStage").value;
   selectedCandidate.source = document.getElementById("editSource").value;
 
+  // Handle stage-specific fields: Rejected stores rejectedAtStage, Hired forces ok status.
   if (selectedCandidate.stage === "Rejected") {
     var rejectedEl = document.getElementById("editRejectedAtStage");
     selectedCandidate.rejectedAtStage = rejectedEl ? rejectedEl.value : "Screen";
@@ -294,7 +343,8 @@ function saveCandidateEdits(event) {
   selectedCandidate.nextStep = document.getElementById("editNextStep").value;
   selectedCandidate.notes = document.getElementById("editNotes").value;
 
-  // Process Last Contact Date calculation in Edit Mode
+  // Process Last Contact Date: convert the picked date into a "days ago" integer.
+  // COLD_CONTACT_DAYS and isActiveCandidate are defined in js/data.js.
   var contactDateVal = document.getElementById("editLastContactDate").value;
   if (contactDateVal) {
     var selDate = new Date(contactDateVal);
@@ -303,6 +353,7 @@ function saveCandidateEdits(event) {
     var daysAgo = Math.floor(diffMs / (1000 * 60 * 60 * 24));
     selectedCandidate.lastContact = daysAgo;
 
+    // Auto-set risk status if contact is too old, or clear it if recently contacted.
     if (daysAgo >= COLD_CONTACT_DAYS && isActiveCandidate(selectedCandidate)) {
       selectedCandidate.status = "risk";
     } else if (selectedCandidate.status === "risk" && daysAgo < COLD_CONTACT_DAYS) {
@@ -310,25 +361,32 @@ function saveCandidateEdits(event) {
     }
   }
 
-  // Persist update in localStorage
+  // Persist update in localStorage.
+  // saveCandidates is defined in js/data.js.
   saveCandidates();
 
-  // Exit edit mode and re-render profile
+  // Exit edit mode and re-render the profile in view mode.
   isEditing = false;
   renderPage();
 }
 
 
-// Schedule or reschedule an interview
+// Schedule or reschedule an interview for the candidate.
+// Reads the datetime picker, saves the date, and auto-advances the stage to
+// "Interview" if the candidate was still in New Applicant or Screen.
+// #interviewPicker is dynamically created by showCandidateDetail() in this file (js/candidate.js).
 function scheduleInterview(id) {
   var picker = document.getElementById("interviewPicker");
   var selectedDate = picker.value;
 
+  // Require a date/time before saving.
   if (!selectedDate) {
     alert("Please select a date and time before saving.");
     return;
   }
 
+  // Find the candidate by id, update their interview date, and advance stage if needed.
+  // CANDIDATES and saveCandidates are defined in js/data.js.
   for (var i = 0; i < CANDIDATES.length; i++) {
     if (CANDIDATES[i].id === id) {
       CANDIDATES[i].interviewDate = selectedDate;
@@ -347,7 +405,8 @@ function scheduleInterview(id) {
 }
 
 
-// Cancel a scheduled interview
+// Cancel a scheduled interview after user confirmation.
+// Clears the interviewDate field and re-renders the profile.
 function cancelInterview(id) {
   var confirmCancel = confirm("Are you sure you want to cancel this scheduled interview?");
 
@@ -355,6 +414,8 @@ function cancelInterview(id) {
     return;
   }
 
+  // Find the candidate by id and clear their interview date.
+  // CANDIDATES and saveCandidates are defined in js/data.js.
   for (var i = 0; i < CANDIDATES.length; i++) {
     if (CANDIDATES[i].id === id) {
       CANDIDATES[i].interviewDate = "";
@@ -368,7 +429,8 @@ function cancelInterview(id) {
 }
 
 
-// Delete the selected candidate
+// Delete the selected candidate after user confirmation.
+// Removes them from the array, saves, and redirects to the candidates list.
 function deleteCandidate(id) {
   var confirmDelete = confirm("Are you sure you want to delete this candidate? This cannot be undone.");
 
@@ -376,6 +438,8 @@ function deleteCandidate(id) {
     return;
   }
 
+  // Find the array index of the candidate to delete.
+  // CANDIDATES and saveCandidates are defined in js/data.js.
   var deleteIndex = -1;
 
   for (var i = 0; i < CANDIDATES.length; i++) {
@@ -384,6 +448,7 @@ function deleteCandidate(id) {
     }
   }
 
+  // Remove the candidate, persist, and navigate back to the list.
   if (deleteIndex !== -1) {
     CANDIDATES.splice(deleteIndex, 1);
     saveCandidates();

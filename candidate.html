@@ -1,5 +1,7 @@
+<!-- HTML5 document declaration and language set to English -->
 <!DOCTYPE html>
 <html lang="en">
+<!-- Head section: metadata, viewport for responsive design, title, and stylesheet link -->
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,24 +9,25 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <!-- Sidebar is filled by js/sidebar.js -->
+  <!-- Sidebar Navigation: empty container populated by buildSidebar() in js/sidebar.js -->
   <nav class="sidebar"></nav>
 
+  <!-- Main content area for the candidate profile page -->
   <main class="content">
+    <!-- Page header with title and description -->
     <header class="page-header">
       <h1>Candidate Profile</h1>
       <p>Review candidate details and next steps</p>
     </header>
 
-    <!-- JavaScript fills this with the selected candidate's profile -->
+    <!-- Candidate detail container: filled with the selected candidate's profile by
+         showCandidateDetail() and showEditForm() in js/candidate.js -->
     <div id="candidateDetail"></div>
   </main>
 
-  <!-- Data must load before candidate.js -->
+  <!-- Scripts: shared data must load before candidate logic, then set empty active page (detail page) and build sidebar -->
   <script src="js/data.js"></script>
   <script src="js/candidate.js"></script>
-
-  <!-- Sidebar setup: no active page because this is a detail page -->
   <script>var ACTIVE_PAGE = "";</script>
   <script src="js/sidebar.js"></script>
 </body>

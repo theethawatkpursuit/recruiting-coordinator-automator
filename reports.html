@@ -1,5 +1,7 @@
+<!-- HTML5 document declaration and language set to English -->
 <!DOCTYPE html>
 <html lang="en">
+<!-- Head section: metadata, viewport for responsive design, title, and stylesheet link -->
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,16 +9,21 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+  <!-- Sidebar Navigation: empty container populated by buildSidebar() in js/sidebar.js -->
   <nav class="sidebar"></nav>
 
+  <!-- Main content area for the reports page -->
   <main class="content">
+    <!-- Page header with title and description -->
     <header class="page-header">
       <h1>Reports</h1>
       <p>Which hiring sources produce hires vs. first-round drop-offs</p>
     </header>
 
+    <!-- Report stat cards: summary metrics filled in by the top-level script in js/reports.js -->
     <section class="stats-grid" id="reportStats"></section>
 
+    <!-- Source Effectiveness panel: table comparing hiring sources, populated by renderSourceTable() in js/reports.js -->
     <section class="panel">
       <h2>Source Effectiveness</h2>
       <table class="data-table" id="sourceTable">
@@ -32,12 +39,14 @@
         </thead>
         <tbody></tbody>
       </table>
+      <!-- Export button: triggers CSV download of the full candidate report -->
       <div class="report-actions">
         <button class="btn-primary" onclick="exportCandidatesCSV()">Export Report</button>
       </div>
     </section>
   </main>
 
+  <!-- Scripts: load shared data, raw HR dataset, HR data parser, reports logic, set active page, then build sidebar -->
   <script src="js/data.js"></script>
   <script src="js/hr-dataset-raw.js"></script>
   <script src="js/hr-data.js"></script>
