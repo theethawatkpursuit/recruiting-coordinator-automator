@@ -20,6 +20,17 @@
       <p>Click any candidate to see their full profile</p>
     </header>
 
+    <!-- Filter bar: dropdowns to narrow candidates by position, department, source, stage, and status.
+         Options are populated dynamically by js/candidates-list.js. -->
+    <div class="filters" id="candidateFilters">
+      <select id="filterPosition"><option value="">All Positions</option></select>
+      <select id="filterDepartment"><option value="">All Departments</option></select>
+      <select id="filterSource"><option value="">All Sources</option></select>
+      <select id="filterStage"><option value="">All Stages</option></select>
+      <select id="filterStatus"><option value="">All Statuses</option></select>
+      <button type="button" class="btn-secondary btn-small" id="clearFilters">Clear</button>
+    </div>
+
     <!-- Candidate list container: filled with clickable rows by the top-level script in js/candidates-list.js -->
     <div class="candidate-list-box" id="candidateList"></div>
   </main>
